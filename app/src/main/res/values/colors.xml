@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#2196F3</color>
+    <color name="colorPrimaryVariant">#2196F3</color>
+    <color name="colorOnPrimary">#2196F3</color>
+    <color name="colorSecondary">#f1f1f1</color>
+    <color name="colorSecondaryVariant">#f1f1f1</color>
+    <color name="colorOnSecondary">#f1f1f1</color>
+
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+
+    <!--<color name="connect_success">#03A9F4</color>-->
+    <color name="connect_failed">#FF1744</color>
+
+    <!--登录时昵称输入框背景-->
+    <color name="nickname_bg">#03A9F4</color>
+    <!--登录按钮背景-->
+    <color name="connect_bg">#4CAF50</color>
+    <!--表情图标颜色-->
+    <color name="emoji">#4D4D4D</color>
+
+    <!--菜单图标颜色-->
+    <color name="menu">#F1F1F1</color>
+    <!--返回图标颜色-->
+    <color name="back">#F1F1F1</color>
+
+    <!--聊天背景-->
+    <color name="chat_bg">#F1F1F1</color>
+    <!--底部导航背景-->
+    <color name="nav_bg">#F7F7F7</color>
+    <!--输入框背景-->
+    <color name="enter_bg">#FFFFFF</color>
+    <!--其他人消息背景-->
+    <color name="other_message_bg">#FFFFFF</color>
+    <!--我的消息背景-->
+    <color name="my_message_bg">#0099FF</color>
+    <!--输入框为空时发送按钮的背景-->
+    <color name="send_btn_null_bg">#76C4F5</color>
+    <!--输入框不为空时发送按钮的背景-->
+    <color name="send_btn_bg">#0099FF</color>
+
+    <color name="room_name">#000000</color>
+    <color name="room_message">#A5A5A5</color>
+    <color name="room_time">#A5A5A5</color>
+
+    <color name="other_chat_bg">#ffffff</color>
+    <color name="self_chat_bg">#0099ff</color>
+</resources>

@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="DesignSurface">
+    <option name="filePathToZoomLevelMap">
+      <map>
+        <entry key="..\:/AndroidStudioProjects/WeeeeChat/app/src/main/res/drawable/ic_back.xml" value="0.361" />
+        <entry key="..\:/AndroidStudioProjects/WeeeeChat/app/src/main/res/drawable/ic_emoji.xml" value="0.395" />
+        <entry key="..\:/AndroidStudioProjects/WeeeeChat/app/src/main/res/drawable/ic_launcher_background.xml" value="0.395" />
+        <entry key="..\:/AndroidStudioProjects/WeeeeChat/app/src/main/res/drawable/ic_launcher_foreground.xml" value="0.361" />
+        <entry key="..\:/AndroidStudioProjects/WeeeeChat/app/src/main/res/drawable/ic_menu.xml" value="0.361" />
+        <entry key="..\:/AndroidStudioProjects/WeeeeChat/app/src/main/res/drawable/style_chat_bg.xml" value="0.395" />
+        <entry key="..\:/AndroidStudioProjects/WeeeeChat/app/src/main/res/drawable/style_chat_enter_bg.xml" value="0.395" />
+        <entry key="..\:/AndroidStudioProjects/WeeeeChat/app/src/main/res/drawable/style_chat_other.xml" value="0.361" />
+        <entry key="..\:/AndroidStudioProjects/WeeeeChat/app/src/main/res/drawable/style_chat_self.xml" value="0.361" />
+        <entry key="..\:/AndroidStudioProjects/WeeeeChat/app/src/main/res/drawable/style_connect_bg.xml" value="0.395" />
+        <entry key="..\:/AndroidStudioProjects/WeeeeChat/app/src/main/res/drawable/style_connect_failed_bg.xml" value="0.395" />
+        <entry key="..\:/AndroidStudioProjects/WeeeeChat/app/src/main/res/drawable/style_nav_bg.xml" value="0.395" />
+        <entry key="..\:/AndroidStudioProjects/WeeeeChat/app/src/main/res/drawable/style_nickname_bg.xml" value="0.395" />
+        <entry key="..\:/AndroidStudioProjects/WeeeeChat/app/src/main/res/drawable/style_room_menu.xml" value="0.361" />
+        <entry key="..\:/AndroidStudioProjects/WeeeeChat/app/src/main/res/drawable/style_search_bg.xml" value="0.395" />
+        <entry key="..\:/AndroidStudioProjects/WeeeeChat/app/src/main/res/drawable/style_send_bg.xml" value="0.395" />
+        <entry key="..\:/AndroidStudioProjects/WeeeeChat/app/src/main/res/drawable/style_send_null_bg.xml" value="0.395" />
+        <entry key="..\:/AndroidStudioProjects/WeeeeChat/app/src/main/res/layout/activity_chat.xml" value="0.3884297520661157" />
+        <entry key="..\:/AndroidStudioProjects/WeeeeChat/app/src/main/res/layout/activity_login.xml" value="0.5494791666666666" />
+        <entry key="..\:/AndroidStudioProjects/WeeeeChat/app/src/main/res/layout/activity_main.xml" value="0.5" />
+        <entry key="..\:/AndroidStudioProjects/WeeeeChat/app/src/main/res/layout/activity_message.xml" value="0.5494791666666666" />
+        <entry key="..\:/AndroidStudioProjects/WeeeeChat/app/src/main/res/layout/activity_room.xml" value="0.4688026981450253" />
+        <entry key="..\:/AndroidStudioProjects/WeeeeChat/app/src/main/res/layout/content_scrolling.xml" value="0.20637715179968702" />
+        <entry key="..\:/AndroidStudioProjects/WeeeeChat/app/src/main/res/layout/fragment_world.xml" value="0.5494791666666666" />
+        <entry key="..\:/AndroidStudioProjects/WeeeeChat/app/src/main/res/layout/item_chat.xml" value="0.5494791666666666" />
+        <entry key="..\:/AndroidStudioProjects/WeeeeChat/app/src/main/res/layout/item_message.xml" value="0.5484375" />
+        <entry key="..\:/AndroidStudioProjects/WeeeeChat/app/src/main/res/layout/item_room.xml" value="0.5494791666666666" />
+        <entry key="..\:/AndroidStudioProjects/WeeeeChat/app/src/main/res/layout/menu_room.xml" value="0.5484375" />
+        <entry key="..\:/AndroidStudioProjects/WeeeeChat/app/src/main/res/layout/motion_09_coordinatorlayout_header.xml" value="0.42015209125475284" />
+        <entry key="..\:/AndroidStudioProjects/WeeeeChat/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml" value="0.395" />
+        <entry key="..\:/AndroidStudioProjects/WeeeeChat/app/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml" value="0.361" />
+        <entry key="..\:/AndroidStudioProjects/WeeeeChat/app/src/main/res/xml/scene_09.xml" value="0.5484375" />
+        <entry key="..\:/AndroidStudioProjects/WeeeeChat/app/src/main/res/xml/scene_search.xml" value="0.5494791666666666" />
+      </map>
+    </option>
+  </component>
+  <component name="ProjectRootManager" version="2" languageLevel="JDK_11" default="true" project-jdk-name="Android Studio default JDK" project-jdk-type="JavaSDK">
+    <output url="file://$PROJECT_DIR$/build/classes" />
+  </component>
+  <component name="ProjectType">
+    <option name="id" value="Android" />
+  </component>
+</project>
