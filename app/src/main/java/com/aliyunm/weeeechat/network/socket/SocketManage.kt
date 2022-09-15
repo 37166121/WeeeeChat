@@ -1,5 +1,6 @@
 package com.aliyunm.weeeechat.network.socket
 
+import android.util.Log
 import com.aliyunm.weeeechat.SingleLiveEvent
 import com.aliyunm.weeeechat.data.model.ChatModel
 import com.aliyunm.weeeechat.data.model.MessageModel
@@ -10,6 +11,8 @@ import com.aliyunm.weeeechat.data.model.MessageModel.Companion.OFFLINE
 import com.aliyunm.weeeechat.data.model.MessageModel.Companion.PRIVATE
 import com.aliyunm.weeeechat.data.model.MessageModel.Companion.QUIT_ROOM
 import com.aliyunm.weeeechat.data.model.MessageModel.Companion.SPECIFY
+import com.aliyunm.weeeechat.data.model.RoomModel
+import com.aliyunm.weeeechat.data.model.UserModel
 import com.aliyunm.weeeechat.network.Api
 import com.aliyunm.weeeechat.util.GsonUtil
 import com.aliyunm.weeeechat.util.MessageUtil
@@ -51,18 +54,26 @@ object SocketManage {
     var _onMessage : (Any) -> Unit = {}
 
     var message : ChatModel by Delegates.observable(ChatModel()) { property, oldValue, newValue ->
-        chats.add(newValue)
-        chatMessage.postValue(newValue)
+        chats.addNotice(newValue)
+        // chats.add(newValue)
+        // chatMessage.postValue(newValue)
     }
 
     val chats : ArrayList<ChatModel> = arrayListOf()
+
+    fun ArrayList<ChatModel>.addNotice(t : ChatModel) {
+        this.add(t)
+        chatMessage.postValue(t)
+    }
+
+    val room_chats : ArrayList<ChatModel> = arrayListOf()
 
     val chatMessage : SingleLiveEvent<ChatModel> = SingleLiveEvent()
 
     fun connect(callback : (Boolean) -> Unit) {
         CoroutineScope(Dispatchers.IO).launch {
             try {
-                println("连接服务器")
+                Log.i(this::class.java.name, "连接服务器")
                 // 连接服务器
                 socket = Socket(Api.IP, Api.SOCKET_PORT)
                 // 第一次访问服务器返回公钥
@@ -88,7 +99,7 @@ object SocketManage {
     }
 
     private fun onMessage(line : String) {
-        println("收到消息")
+        Log.i(this::class.java.name, "收到消息")
         val s: List<String> = line.split("--------------------------")
         val messageModel = GsonUtil.fromJson(MessageUtil.decode(s[0], s[1]), MessageModel::class.java)
         when(messageModel.type) {
@@ -102,33 +113,35 @@ object SocketManage {
             }
             // 收到广播
             BROADCAST -> {
-                val chatModel : ChatModel = setChatBean(GsonUtil.toJson(messageModel.content ?: ""))
+                val chatModel : ChatModel = setChatModel(GsonUtil.toJson(messageModel.content ?: ""))
                 message = chatModel
             }
             // 收到房间消息
             SPECIFY -> {
-                val chatModel : ChatModel = setChatBean(GsonUtil.toJson(messageModel.content ?: ""))
+                val chatModel : ChatModel = setChatModel(GsonUtil.toJson(messageModel.content ?: ""))
                 message = chatModel
             }
             // 收到私聊
             PRIVATE -> {
-                val chatModel : ChatModel = setChatBean(GsonUtil.toJson(messageModel.content ?: ""))
+                val chatModel : ChatModel = setChatModel(GsonUtil.toJson(messageModel.content ?: ""))
                 message = chatModel
             }
-
+            // 有人进入房间
             ENTER_ROOM -> {
-
+                val userModel : UserModel = setUserModel(GsonUtil.toJson(messageModel.content ?: ""))
+                // rooms.add(RoomModel(rid = chatModel.toRid))
             }
-
+            // 有人退出房间
             QUIT_ROOM -> {
-
+                val chatModel : ChatModel = setChatModel(GsonUtil.toJson(messageModel.content ?: ""))
             }
         }
     }
 
     fun<T> sendMessage(message: MessageModel<T>, callback : (Boolean) -> Unit = {}) {
+        Log.i(this::class.java.name, "发送消息")
         CoroutineScope(Dispatchers.IO).launch {
-            if (socket?.isConnected == true && socket?.isClosed == false) {
+            if (socket?.isClosed == false && socket?.isConnected == true) {
                 val message = MessageUtil.encrypt(Gson().toJson(message), publicKey)
                 writer.write(message)
                 callback(true)
@@ -144,9 +157,13 @@ object SocketManage {
         }
     }
 
-
-    fun setChatBean(json: String): ChatModel {
+    fun setChatModel(json: String): ChatModel {
         val type: Type = object : TypeToken<ChatModel>() {}.type
+        return GsonUtil.fromJson(json, type)
+    }
+
+    fun setUserModel(json: String): UserModel {
+        val type: Type = object : TypeToken<UserModel>() {}.type
         return GsonUtil.fromJson(json, type)
     }
 

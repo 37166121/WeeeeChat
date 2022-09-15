@@ -83,11 +83,6 @@ object SharedPreferencesUtil {
         return mSharedPreferences.contains(key)
     }
 
-    fun remove(key: String) {
-        mEditor.remove(key)
-        commit()
-    }
-
     fun remove(vararg key: String) {
         key.iterator().forEach {
             mEditor.remove(it)

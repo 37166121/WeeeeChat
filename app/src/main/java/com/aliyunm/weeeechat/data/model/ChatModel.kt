@@ -15,12 +15,12 @@ data class ChatModel(
     /**
      * 接收方 私聊 用户id
      */
-    val toUid: String = "",
+    val uid: String = "",
 
     /**
      * 接收方 群聊 房间id
      */
-    val toRid: Int = 0,
+    val rid: Int = 0,
 
     /**
      * 消息发布时间

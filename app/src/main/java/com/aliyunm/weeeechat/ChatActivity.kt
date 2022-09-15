@@ -1,7 +1,7 @@
 package com.aliyunm.weeeechat
 
+import android.view.KeyEvent
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.aliyunm.weeeechat.adapter.ChatListAdapter
 import com.aliyunm.weeeechat.base.BaseActivity
@@ -9,6 +9,7 @@ import com.aliyunm.weeeechat.data.model.ChatModel
 import com.aliyunm.weeeechat.data.model.MessageModel
 import com.aliyunm.weeeechat.databinding.ActivityChatBinding
 import com.aliyunm.weeeechat.network.socket.SocketManage
+import com.aliyunm.weeeechat.network.socket.SocketManage.addNotice
 import com.aliyunm.weeeechat.viewmodel.ChatViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -21,11 +22,27 @@ class ChatActivity : BaseActivity<ActivityChatBinding, ChatViewModel>() {
 
     override fun initData() {
         adapter = ChatListAdapter(chats)
-        chats.addAll(SocketManage.chats)
-        viewModel.onMessage(this) {
-            chats.add(it)
-            CoroutineScope(Dispatchers.Main).launch {
-                adapter.notifyItemInserted(chats.size - 1)
+        chats.addAll(SocketManage.room_chats)
+        viewModel.apply {
+            rid = intent.getIntExtra("rid", 0)
+            uid = intent.getStringExtra("uid") ?: ""
+            name = intent.getStringExtra("name") ?: ""
+            onMessage(this@ChatActivity) {
+                if (uid != "") {
+                    // 私聊 比较toUid是否相同
+                    if (it.uid == uid) {
+                        chats.add(it)
+                    }
+                } else {
+                    // 群聊 比较toRid是否相同
+                    if (it.rid == rid) {
+                        chats.add(it)
+                    }
+                }
+                CoroutineScope(Dispatchers.Main).launch {
+                    adapter.notifyItemInserted(chats.size - 1)
+                    viewBinding.chatList.scrollToPosition(chats.size - 1)
+                }
             }
         }
     }
@@ -50,6 +67,8 @@ class ChatActivity : BaseActivity<ActivityChatBinding, ChatViewModel>() {
                 }
             }
 
+            roomName.text = viewModel.name
+
             toolbar.apply {
                 post {
                     minimumHeight += getStatusBarHeight()
@@ -62,9 +81,6 @@ class ChatActivity : BaseActivity<ActivityChatBinding, ChatViewModel>() {
                 adapter = this@ChatActivity.adapter
                 itemAnimator = null
                 scrollToPosition(chats.size - 1)
-                val navigationBarHeight = getNavigationBarHeight()
-                val statusBarHeight = getStatusBarHeight()
-                setPadding(paddingStart, paddingTop, paddingEnd, paddingBottom + navigationBarHeight + statusBarHeight)
             }
 
             navbar.apply {
@@ -76,17 +92,41 @@ class ChatActivity : BaseActivity<ActivityChatBinding, ChatViewModel>() {
 
             send.apply {
                 setOnClickListener {
-                    val message = viewModel.chatEnter.value ?: ""
-                    viewModel.sendMessage(MessageModel.BROADCAST, message)
-                    val chat = ChatModel(message)
-                    chats.add(chat)
-                    SocketManage.chats.add(chat)
-                    adapter.notifyItemInserted(chats.size - 1)
-                    chatList.scrollToPosition(chats.size - 1)
+                    send()
                 }
             }
         }
+    }
 
+    private fun send() {
+        viewModel.apply {
+            if ((chatEnter.value ?: "").isNotBlank()) {
+                val message = chatEnter.value ?: ""
+                val type: Int
+                val chatModel = if (uid != "") {
+                    type = MessageModel.PRIVATE
+                    ChatModel(content = message, uid = uid)
+                } else {
+                    type = MessageModel.SPECIFY
+                    ChatModel(content = message, rid = rid)
+                }
+                sendMessage(type, chatModel) {
+                    if (it) {
+                        chatEnter.postValue("")
+                    }
+                }
+                SocketManage.chats.addNotice(chatModel)
+            }
+        }
+    }
+
+    override fun onKeyUp(keyCode: Int, event: KeyEvent): Boolean {
+        if (event.action == KeyEvent.ACTION_UP) {
+            if (keyCode == KeyEvent.KEYCODE_ENTER) {
+                send()
+            }
+        }
+        return super.onKeyUp(keyCode, event)
     }
 
     override fun getViewBinding_(): ActivityChatBinding {

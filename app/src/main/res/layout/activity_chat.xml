@@ -47,7 +47,6 @@
                     android:layout_height="wrap_content"
                     android:gravity="center"
                     android:maxLines="1"
-                    android:text="哈哈哈哈asdddd"
                     android:textColor="@color/white"
                     android:textSize="18sp"
                     app:layout_constraintBottom_toBottomOf="parent"
@@ -74,7 +73,7 @@
             android:id="@+id/chat_list"
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintBottom_toTopOf="@+id/navbar"
             app:layout_constraintTop_toBottomOf="@+id/toolbar" />
 
         <LinearLayout

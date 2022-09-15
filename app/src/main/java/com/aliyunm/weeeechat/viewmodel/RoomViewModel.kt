@@ -4,6 +4,7 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.aliyunm.weeeechat.data.model.ChatModel
+import com.aliyunm.weeeechat.data.model.MessageModel
 import com.aliyunm.weeeechat.network.socket.SocketManage
 
 class RoomViewModel : ViewModel() {
@@ -13,8 +14,11 @@ class RoomViewModel : ViewModel() {
         SocketManage.chatMessage.observe(owner) {
             callback(it as ChatModel)
         }
-        // SocketManage._onMessage = {
-        //     callback(it as ChatModel)
-        // }
+    }
+
+    fun enterRoom(chatModel: ChatModel, callback : (Boolean) -> Unit) {
+        SocketManage.sendMessage(MessageModel(type = MessageModel.ENTER_ROOM, content = chatModel)) {
+            callback(it)
+        }
     }
 }

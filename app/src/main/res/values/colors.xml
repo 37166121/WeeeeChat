@@ -40,6 +40,7 @@
     <!--输入框不为空时发送按钮的背景-->
     <color name="send_btn_bg">#0099FF</color>
 
+    <color name="room_search">#CACACA</color>
     <color name="room_name">#000000</color>
     <color name="room_message">#A5A5A5</color>
     <color name="room_time">#A5A5A5</color>

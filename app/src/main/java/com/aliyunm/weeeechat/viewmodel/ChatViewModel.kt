@@ -8,6 +8,9 @@ import com.aliyunm.weeeechat.data.model.MessageModel
 import com.aliyunm.weeeechat.network.socket.SocketManage
 
 class ChatViewModel : ViewModel() {
+    lateinit var name : String
+    var rid : Int = 0
+    lateinit var uid : String
     val chatEnter : MutableLiveData<String> = MutableLiveData()
 
     fun onMessage(owner : LifecycleOwner, callback : (ChatModel) -> Unit) {
@@ -16,7 +19,9 @@ class ChatViewModel : ViewModel() {
         }
     }
 
-    fun sendMessage(type : Int, message : String) {
-        SocketManage.sendMessage(MessageModel(type, ChatModel(content = message)))
+    fun sendMessage(type : Int, chatModel : ChatModel, callback : (Boolean) -> Unit = {}) {
+        SocketManage.sendMessage(MessageModel(type, chatModel)) {
+            callback(it)
+        }
     }
 }

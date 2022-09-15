@@ -1,25 +1,32 @@
 package com.aliyunm.weeeechat
 
 import android.content.Intent
+import android.text.Editable
+import android.text.TextWatcher
+import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.WindowManager
+import android.widget.EditText
 import android.widget.PopupWindow
 import android.widget.TextView
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.view.marginBottom
 import androidx.core.view.marginTop
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.aliyunm.weeeechat.adapter.RoomListAdapter
 import com.aliyunm.weeeechat.base.BaseActivity
+import com.aliyunm.weeeechat.data.model.ChatModel
 import com.aliyunm.weeeechat.data.model.RoomModel
 import com.aliyunm.weeeechat.databinding.ActivityRoomBinding
 import com.aliyunm.weeeechat.network.socket.SocketManage
 import com.aliyunm.weeeechat.viewmodel.RoomViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
 class RoomActivity : BaseActivity<ActivityRoomBinding, RoomViewModel>() {
@@ -28,11 +35,11 @@ class RoomActivity : BaseActivity<ActivityRoomBinding, RoomViewModel>() {
     private lateinit var adapter : RoomListAdapter
 
     override fun initData() {
-        rooms.add(RoomModel(0, "大厅", arrayListOf()))
+        rooms.add(RoomModel(0, "大厅"))
         adapter = RoomListAdapter(rooms)
         viewModel.onMessage(this) {
             rooms.forEachIndexed { index, roomModel ->
-                if (roomModel.rid == it.toRid) {
+                if (roomModel.rid == it.rid) {
                     roomModel.messages.add(it)
                     CoroutineScope(Dispatchers.Main).launch {
                         adapter.notifyItemChanged(index)
@@ -44,9 +51,10 @@ class RoomActivity : BaseActivity<ActivityRoomBinding, RoomViewModel>() {
 
     override fun onStart() {
         super.onStart()
-        SocketManage.chats.forEach {
-            rooms.forEach { room ->
-                if (room.rid == it.toRid) {
+        rooms.forEach { room ->
+            room.messages.clear()
+            SocketManage.chats.forEach {
+                if (room.rid == it.rid) {
                     room.messages.add(it)
                 }
             }
@@ -78,6 +86,23 @@ class RoomActivity : BaseActivity<ActivityRoomBinding, RoomViewModel>() {
                 showPopupWindow(it)
             }
         }
+    }
+
+    override fun onKeyUp(keyCode: Int, event: KeyEvent): Boolean {
+        if (keyCode == KeyEvent.KEYCODE_ENTER) {
+            viewBinding.search.apply {
+                rooms.add(RoomModel(rid = text.toString().toInt(), name = text.toString()))
+                viewModel.enterRoom(ChatModel(rid = text.toString().toInt())) {
+
+                }
+                setText("")
+                clearFocus()
+            }
+            CoroutineScope(Dispatchers.Main).launch {
+                adapter.notifyItemInserted(rooms.size - 1)
+            }
+        }
+        return super.onKeyUp(keyCode, event)
     }
 
     lateinit var popup : PopupWindow

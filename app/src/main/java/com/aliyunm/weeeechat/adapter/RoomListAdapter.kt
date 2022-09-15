@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.aliyunm.weeeechat.ChatActivity
 import com.aliyunm.weeeechat.R
 import com.aliyunm.weeeechat.data.model.RoomModel
+import com.aliyunm.weeeechat.network.socket.SocketManage
 
 class RoomListAdapter(val data : ArrayList<RoomModel>) : RecyclerView.Adapter<RoomListAdapter.MessageViewHolder>() {
 
@@ -39,8 +40,18 @@ class RoomListAdapter(val data : ArrayList<RoomModel>) : RecyclerView.Adapter<Ro
             holder.time.text = timeFormat(chat.time)
         }
         holder.itemView.setOnClickListener {
+            var rid = room.rid
+            var uid = ""
+            if (room.messages.size != 0) {
+                val chat = room.messages.last()
+                uid = chat.uid
+            }
             val intent = Intent(mContext, ChatActivity::class.java)
-            intent.putExtra("chats", room.messages)
+            SocketManage.room_chats.clear()
+            SocketManage.room_chats.addAll(room.messages)
+            intent.putExtra("name", room.name)
+            intent.putExtra("rid", rid)
+            intent.putExtra("uid", uid)
             mContext.startActivity(intent)
         }
     }

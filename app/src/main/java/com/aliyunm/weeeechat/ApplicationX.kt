@@ -1,6 +1,7 @@
 package com.aliyunm.weeeechat
 
 import android.app.Application
+import android.util.Log
 import android.widget.Toast
 import com.aliyunm.weeeechat.network.socket.SocketManage
 import com.aliyunm.weeeechat.util.RSAUtil
@@ -19,7 +20,7 @@ class ApplicationX : Application() {
         SharedPreferencesUtil.setSharedPreferences(getSharedPreferences(BuildConfig.APPLICATION_ID, MODE_PRIVATE))
         RSAUtil.generateKeyPair()
         SocketManage.connect {
-            println(if (it) "连接成功" else "连接失败")
+            Log.i(this::class.java.name, if (it) "连接成功" else "连接失败")
         }
     }
 }
