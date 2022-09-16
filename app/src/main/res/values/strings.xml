@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">WeeeeChat</string>
+    <string-array name="room_type">
+        <item>房间</item>
+        <item>私聊</item>
+    </string-array>
 </resources>

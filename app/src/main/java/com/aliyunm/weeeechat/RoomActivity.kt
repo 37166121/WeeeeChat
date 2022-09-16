@@ -19,6 +19,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.aliyunm.weeeechat.adapter.RoomListAdapter
 import com.aliyunm.weeeechat.base.BaseActivity
 import com.aliyunm.weeeechat.data.model.ChatModel
+import com.aliyunm.weeeechat.data.model.MessageModel
 import com.aliyunm.weeeechat.data.model.RoomModel
 import com.aliyunm.weeeechat.databinding.ActivityRoomBinding
 import com.aliyunm.weeeechat.network.socket.SocketManage
@@ -91,8 +92,11 @@ class RoomActivity : BaseActivity<ActivityRoomBinding, RoomViewModel>() {
     override fun onKeyUp(keyCode: Int, event: KeyEvent): Boolean {
         if (keyCode == KeyEvent.KEYCODE_ENTER) {
             viewBinding.search.apply {
+                // if (text.isNotBlank() && text[0].toString().toInt() == 0) {
+                //     rooms.add(RoomModel(rid = text.toString().toInt(), type = RoomModel.PRIVATE, name = text.toString()))
+                // }
                 rooms.add(RoomModel(rid = text.toString().toInt(), name = text.toString()))
-                viewModel.enterRoom(ChatModel(rid = text.toString().toInt())) {
+                viewModel.enterRoom(ChatModel(type = MessageModel.ENTER_ROOM, rid = text.toString().toInt())) {
 
                 }
                 setText("")

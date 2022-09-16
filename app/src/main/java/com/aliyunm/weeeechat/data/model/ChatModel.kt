@@ -5,6 +5,8 @@ import java.util.Date
 
 data class ChatModel(
 
+    val type : Int = MessageModel.SPECIFY,
+
     val content : String = "",
 
     /**

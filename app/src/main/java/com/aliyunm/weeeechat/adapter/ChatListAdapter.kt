@@ -11,9 +11,10 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.aliyunm.weeeechat.R
 import com.aliyunm.weeeechat.data.model.ChatModel
+import com.aliyunm.weeeechat.data.model.MessageModel
 import com.aliyunm.weeeechat.util.SharedPreferencesUtil
 
-class ChatListAdapter(val data : ArrayList<ChatModel>) : RecyclerView.Adapter<ChatListAdapter.ChatViewHolder>() {
+class ChatListAdapter(val data : ArrayList<ChatModel>) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     lateinit var mContext : Context
 
@@ -29,32 +30,64 @@ class ChatListAdapter(val data : ArrayList<ChatModel>) : RecyclerView.Adapter<Ch
         val time_self : TextView = itemView.findViewById(R.id.time_self)
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ChatViewHolder {
-        mContext = parent.context
-        val view = LayoutInflater.from(parent.context).inflate(R.layout.item_chat, parent, false)
-        return ChatViewHolder(view)
+    class EnterRoomViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+        val enter_room : TextView = itemView.findViewById(R.id.enter_room)
     }
 
-    override fun onBindViewHolder(holder: ChatViewHolder, position: Int) {
-        val chat = data[position]
-        val uid = SharedPreferencesUtil.getString("uid", "")
-        if (chat.user.uid == uid) {
-            holder.apply {
-                self.visibility = View.VISIBLE
-                other.visibility = View.GONE
-                name_self.text = chat.user.nickname
-                message_self.setText(chat.content)
-                time_self.text = timeFormat(chat.time)
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
+        mContext = parent.context
+        when(viewType) {
+
+            MessageModel.ENTER_ROOM -> {
+                val view = LayoutInflater.from(parent.context).inflate(R.layout.item_enter_room, parent, false)
+                return EnterRoomViewHolder(view)
             }
-        } else {
-            holder.apply {
-                self.visibility = View.GONE
-                other.visibility = View.VISIBLE
-                name_other.text = chat.user.nickname
-                message_other.setText(chat.content)
-                time_other.text = timeFormat(chat.time)
+
+            MessageModel.QUIT_ROOM  -> {
+                val view = LayoutInflater.from(parent.context).inflate(R.layout.item_enter_room, parent, false)
+                return EnterRoomViewHolder(view)
+            }
+
+            else                    -> {
+                val view = LayoutInflater.from(parent.context).inflate(R.layout.item_chat, parent, false)
+                return ChatViewHolder(view)
             }
         }
+    }
+
+    override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
+        val chat = data[position]
+        val uid = SharedPreferencesUtil.getString("uid", "")
+        when(holder) {
+
+            is ChatViewHolder -> {
+                if (chat.user.uid == uid) {
+                    holder.apply {
+                        self.visibility = View.VISIBLE
+                        other.visibility = View.GONE
+                        name_self.text = chat.user.nickname
+                        message_self.setText(chat.content)
+                        time_self.text = timeFormat(chat.time)
+                    }
+                } else {
+                    holder.apply {
+                        self.visibility = View.GONE
+                        other.visibility = View.VISIBLE
+                        name_other.text = chat.user.nickname
+                        message_other.setText(chat.content)
+                        time_other.text = timeFormat(chat.time)
+                    }
+                }
+            }
+
+            is EnterRoomViewHolder -> {
+                holder.enter_room.text = "${chat.user.nickname}${if (chat.type == MessageModel.ENTER_ROOM) "进入" else "退出"}房间"
+            }
+        }
+    }
+
+    override fun getItemViewType(position: Int): Int {
+        return data[position].type
     }
 
     private fun timeFormat(time : Long): String {

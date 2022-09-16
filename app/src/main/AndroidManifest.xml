@@ -4,7 +4,7 @@
     package="com.aliyunm.weeeechat">
 
     <uses-permission android:name="android.permission.INTERNET" />
-
+    <uses-permission android:name="android.permission.CHANGE_CONFIGURATION" />
     <application
         android:name=".ApplicationX"
         android:allowBackup="true"

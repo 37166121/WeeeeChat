@@ -32,6 +32,7 @@ class MainViewModel : ViewModel() {
         viewModelScope.launch {
             Service.getPublicKey {
                 SharedPreferencesUtil.putString("serverPublicKey", it)
+                    .commit()
                 SocketManage.publicKey = it
                 callback()
             }

@@ -17,6 +17,7 @@
         <entry key="..\:/AndroidStudioProjects/WeeeeChat/app/src/main/res/drawable/style_nav_bg.xml" value="0.395" />
         <entry key="..\:/AndroidStudioProjects/WeeeeChat/app/src/main/res/drawable/style_nickname_bg.xml" value="0.395" />
         <entry key="..\:/AndroidStudioProjects/WeeeeChat/app/src/main/res/drawable/style_room_menu.xml" value="0.361" />
+        <entry key="..\:/AndroidStudioProjects/WeeeeChat/app/src/main/res/drawable/style_room_type.xml" value="0.542" />
         <entry key="..\:/AndroidStudioProjects/WeeeeChat/app/src/main/res/drawable/style_search_bg.xml" value="0.395" />
         <entry key="..\:/AndroidStudioProjects/WeeeeChat/app/src/main/res/drawable/style_send_bg.xml" value="0.395" />
         <entry key="..\:/AndroidStudioProjects/WeeeeChat/app/src/main/res/drawable/style_send_null_bg.xml" value="0.395" />
@@ -28,8 +29,10 @@
         <entry key="..\:/AndroidStudioProjects/WeeeeChat/app/src/main/res/layout/content_scrolling.xml" value="0.20637715179968702" />
         <entry key="..\:/AndroidStudioProjects/WeeeeChat/app/src/main/res/layout/fragment_world.xml" value="0.5494791666666666" />
         <entry key="..\:/AndroidStudioProjects/WeeeeChat/app/src/main/res/layout/item_chat.xml" value="0.5494791666666666" />
+        <entry key="..\:/AndroidStudioProjects/WeeeeChat/app/src/main/res/layout/item_enter_room.xml" value="0.5484375" />
         <entry key="..\:/AndroidStudioProjects/WeeeeChat/app/src/main/res/layout/item_message.xml" value="0.5484375" />
         <entry key="..\:/AndroidStudioProjects/WeeeeChat/app/src/main/res/layout/item_room.xml" value="0.5494791666666666" />
+        <entry key="..\:/AndroidStudioProjects/WeeeeChat/app/src/main/res/layout/layout_room_search.xml" value="0.5484375" />
         <entry key="..\:/AndroidStudioProjects/WeeeeChat/app/src/main/res/layout/menu_room.xml" value="0.5484375" />
         <entry key="..\:/AndroidStudioProjects/WeeeeChat/app/src/main/res/layout/motion_09_coordinatorlayout_header.xml" value="0.42015209125475284" />
         <entry key="..\:/AndroidStudioProjects/WeeeeChat/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml" value="0.395" />

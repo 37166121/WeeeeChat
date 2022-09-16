@@ -11,7 +11,6 @@ import com.aliyunm.weeeechat.data.model.MessageModel.Companion.OFFLINE
 import com.aliyunm.weeeechat.data.model.MessageModel.Companion.PRIVATE
 import com.aliyunm.weeeechat.data.model.MessageModel.Companion.QUIT_ROOM
 import com.aliyunm.weeeechat.data.model.MessageModel.Companion.SPECIFY
-import com.aliyunm.weeeechat.data.model.RoomModel
 import com.aliyunm.weeeechat.data.model.UserModel
 import com.aliyunm.weeeechat.network.Api
 import com.aliyunm.weeeechat.util.GsonUtil
@@ -55,15 +54,13 @@ object SocketManage {
 
     var message : ChatModel by Delegates.observable(ChatModel()) { property, oldValue, newValue ->
         chats.addNotice(newValue)
-        // chats.add(newValue)
-        // chatMessage.postValue(newValue)
     }
 
     val chats : ArrayList<ChatModel> = arrayListOf()
 
-    fun ArrayList<ChatModel>.addNotice(t : ChatModel) {
-        this.add(t)
-        chatMessage.postValue(t)
+    fun ArrayList<ChatModel>.addNotice(chat : ChatModel) {
+        this.add(chat)
+        chatMessage.postValue(chat)
     }
 
     val room_chats : ArrayList<ChatModel> = arrayListOf()
@@ -128,8 +125,8 @@ object SocketManage {
             }
             // 有人进入房间
             ENTER_ROOM -> {
-                val userModel : UserModel = setUserModel(GsonUtil.toJson(messageModel.content ?: ""))
-                // rooms.add(RoomModel(rid = chatModel.toRid))
+                val chatModel : ChatModel = setChatModel(GsonUtil.toJson(messageModel.content ?: ""))
+                message = chatModel
             }
             // 有人退出房间
             QUIT_ROOM -> {

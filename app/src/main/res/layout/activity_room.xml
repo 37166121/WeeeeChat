@@ -60,18 +60,18 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:background="@drawable/style_search_bg"
+                    android:hint="进入房间"
                     android:imeOptions="actionSearch"
                     android:inputType="number"
+                    android:maxLength="10"
                     android:maxLines="1"
                     android:paddingStart="15dp"
                     android:paddingTop="6dp"
                     android:paddingEnd="15dp"
                     android:paddingBottom="6dp"
-                    android:maxLength="10"
-                    android:hint="进入房间"
-                    android:textColorHint="@color/room_search"
+                    android:text="@={viewmodel.search}"
                     android:textColor="@color/room_search"
-                    android:text="@={viewmodel.search}" />
+                    android:textColorHint="@color/room_search" />
 
             </com.aliyunm.weeeechat.weidget.WidgetCollapsibleToolbar>
 
