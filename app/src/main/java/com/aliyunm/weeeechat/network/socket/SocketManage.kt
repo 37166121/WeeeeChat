@@ -1,16 +1,13 @@
 package com.aliyunm.weeeechat.network.socket
 
 import android.util.Log
+import androidx.lifecycle.MutableLiveData
 import com.aliyunm.weeeechat.SingleLiveEvent
 import com.aliyunm.weeeechat.data.model.ChatModel
 import com.aliyunm.weeeechat.data.model.MessageModel
-import com.aliyunm.weeeechat.data.model.MessageModel.Companion.BROADCAST
 import com.aliyunm.weeeechat.data.model.MessageModel.Companion.CONNECT
-import com.aliyunm.weeeechat.data.model.MessageModel.Companion.ENTER_ROOM
 import com.aliyunm.weeeechat.data.model.MessageModel.Companion.OFFLINE
-import com.aliyunm.weeeechat.data.model.MessageModel.Companion.PRIVATE
-import com.aliyunm.weeeechat.data.model.MessageModel.Companion.QUIT_ROOM
-import com.aliyunm.weeeechat.data.model.MessageModel.Companion.SPECIFY
+import com.aliyunm.weeeechat.data.model.RoomModel
 import com.aliyunm.weeeechat.data.model.UserModel
 import com.aliyunm.weeeechat.network.Api
 import com.aliyunm.weeeechat.util.GsonUtil
@@ -19,6 +16,7 @@ import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.io.BufferedReader
 import java.io.InputStreamReader
@@ -53,14 +51,27 @@ object SocketManage {
     var _onMessage : (Any) -> Unit = {}
 
     var message : ChatModel by Delegates.observable(ChatModel()) { property, oldValue, newValue ->
+        rooms.forEach {
+            if (newValue.uid.isNotBlank()) {
+
+            } else {
+                if (it.rid == newValue.rid) {
+                    it.messages.add(newValue)
+                }
+            }
+        }
         chats.addNotice(newValue)
     }
+
+    val rooms : ArrayList<RoomModel> = arrayListOf(RoomModel(0, "大厅"))
 
     val chats : ArrayList<ChatModel> = arrayListOf()
 
     fun ArrayList<ChatModel>.addNotice(chat : ChatModel) {
         this.add(chat)
-        chatMessage.postValue(chat)
+        CoroutineScope(Dispatchers.Main).launch {
+            chatMessage.value = chat
+        }
     }
 
     val room_chats : ArrayList<ChatModel> = arrayListOf()
@@ -68,7 +79,7 @@ object SocketManage {
     val chatMessage : SingleLiveEvent<ChatModel> = SingleLiveEvent()
 
     fun connect(callback : (Boolean) -> Unit) {
-        CoroutineScope(Dispatchers.IO).launch {
+        val job = CoroutineScope(Dispatchers.IO).launch {
             try {
                 Log.i(this::class.java.name, "连接服务器")
                 // 连接服务器
@@ -90,7 +101,15 @@ object SocketManage {
                 reader.close()
             } catch (e: Exception) {
                 e.printStackTrace()
+            }
+        }
+        CoroutineScope(Dispatchers.IO).launch {
+            job.start()
+            // 如果十秒后没回应，判定为连接失败
+            delay(10 * 1000)
+            if (socket == null) {
                 callback(false)
+                job.cancel()
             }
         }
     }
@@ -105,32 +124,9 @@ object SocketManage {
                 _onMessage(true)
             }
 
-            OFFLINE -> {
-
-            }
-            // 收到广播
-            BROADCAST -> {
+            else -> {
                 val chatModel : ChatModel = setChatModel(GsonUtil.toJson(messageModel.content ?: ""))
                 message = chatModel
-            }
-            // 收到房间消息
-            SPECIFY -> {
-                val chatModel : ChatModel = setChatModel(GsonUtil.toJson(messageModel.content ?: ""))
-                message = chatModel
-            }
-            // 收到私聊
-            PRIVATE -> {
-                val chatModel : ChatModel = setChatModel(GsonUtil.toJson(messageModel.content ?: ""))
-                message = chatModel
-            }
-            // 有人进入房间
-            ENTER_ROOM -> {
-                val chatModel : ChatModel = setChatModel(GsonUtil.toJson(messageModel.content ?: ""))
-                message = chatModel
-            }
-            // 有人退出房间
-            QUIT_ROOM -> {
-                val chatModel : ChatModel = setChatModel(GsonUtil.toJson(messageModel.content ?: ""))
             }
         }
     }
@@ -141,6 +137,7 @@ object SocketManage {
             if (socket?.isClosed == false && socket?.isConnected == true) {
                 val message = MessageUtil.encrypt(Gson().toJson(message), publicKey)
                 writer.write(message)
+                writer.flush()
                 callback(true)
             } else {
                 // 连接已断开
@@ -150,7 +147,6 @@ object SocketManage {
                     }
                 }
             }
-            writer.flush()
         }
     }
 

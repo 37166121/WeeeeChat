@@ -10,6 +10,8 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.aliyunm.weeeechat.ChatActivity
 import com.aliyunm.weeeechat.R
+import com.aliyunm.weeeechat.data.model.ChatModel
+import com.aliyunm.weeeechat.data.model.MessageModel
 import com.aliyunm.weeeechat.data.model.RoomModel
 import com.aliyunm.weeeechat.network.socket.SocketManage
 
@@ -38,6 +40,14 @@ class RoomListAdapter(val data : ArrayList<RoomModel>) : RecyclerView.Adapter<Ro
             val chat = room.messages.last()
             holder.message.text = "${chat.user.nickname}:${chat.content}"
             holder.time.text = timeFormat(chat.time)
+        }
+        if (position != 0) {
+            holder.itemView.setOnLongClickListener {
+                data.removeAt(position)
+                notifyItemRemoved(position)
+                SocketManage.sendMessage(MessageModel(type = MessageModel.QUIT_ROOM, content = ChatModel(type = MessageModel.QUIT_ROOM, rid = room.rid)))
+                return@setOnLongClickListener true
+            }
         }
         holder.itemView.setOnClickListener {
             var rid = room.rid

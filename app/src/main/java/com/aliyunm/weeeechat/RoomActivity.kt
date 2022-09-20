@@ -32,16 +32,14 @@ import kotlinx.coroutines.launch
 
 class RoomActivity : BaseActivity<ActivityRoomBinding, RoomViewModel>() {
 
-    private val rooms : ArrayList<RoomModel> = arrayListOf()
+    private val rooms : ArrayList<RoomModel> = SocketManage.rooms
     private lateinit var adapter : RoomListAdapter
 
     override fun initData() {
-        rooms.add(RoomModel(0, "大厅"))
         adapter = RoomListAdapter(rooms)
         viewModel.onMessage(this) {
             rooms.forEachIndexed { index, roomModel ->
                 if (roomModel.rid == it.rid) {
-                    roomModel.messages.add(it)
                     CoroutineScope(Dispatchers.Main).launch {
                         adapter.notifyItemChanged(index)
                     }
@@ -52,7 +50,7 @@ class RoomActivity : BaseActivity<ActivityRoomBinding, RoomViewModel>() {
 
     override fun onStart() {
         super.onStart()
-        rooms.forEach { room ->
+        viewModel.rooms.forEach { room ->
             room.messages.clear()
             SocketManage.chats.forEach {
                 if (room.rid == it.rid) {
@@ -92,9 +90,6 @@ class RoomActivity : BaseActivity<ActivityRoomBinding, RoomViewModel>() {
     override fun onKeyUp(keyCode: Int, event: KeyEvent): Boolean {
         if (keyCode == KeyEvent.KEYCODE_ENTER) {
             viewBinding.search.apply {
-                // if (text.isNotBlank() && text[0].toString().toInt() == 0) {
-                //     rooms.add(RoomModel(rid = text.toString().toInt(), type = RoomModel.PRIVATE, name = text.toString()))
-                // }
                 rooms.add(RoomModel(rid = text.toString().toInt(), name = text.toString()))
                 viewModel.enterRoom(ChatModel(type = MessageModel.ENTER_ROOM, rid = text.toString().toInt())) {
 

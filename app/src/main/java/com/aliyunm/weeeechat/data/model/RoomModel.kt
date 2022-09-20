@@ -10,6 +10,10 @@ data class RoomModel(
      */
     val name : String,
     /**
+     * 房间在线人数
+     */
+    val count : Int = 0,
+    /**
      * 房间类型
      */
     val type : Int = ROOM,

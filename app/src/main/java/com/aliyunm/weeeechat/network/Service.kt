@@ -12,4 +12,13 @@ object Service {
         }
         callback(publicKey.toString())
     }
+
+    suspend fun getRoom(rid : Int, callback : (Int) -> Unit) {
+        val reader = API.getRoom(rid).charStream()
+        val count = StringBuffer()
+        reader.readLines().forEach {
+            count.append(it)
+        }
+        callback(count.toString().toInt())
+    }
 }

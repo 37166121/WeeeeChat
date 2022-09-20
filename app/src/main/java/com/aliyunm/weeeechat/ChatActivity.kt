@@ -112,10 +112,9 @@ class ChatActivity : BaseActivity<ActivityChatBinding, ChatViewModel>() {
                 }
                 sendMessage(type, chatModel) {
                     if (it) {
-                        chatEnter.postValue("")
+                        SocketManage.chats.addNotice(chatModel)
                     }
                 }
-                SocketManage.chats.addNotice(chatModel)
             }
         }
     }

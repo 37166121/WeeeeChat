@@ -3,7 +3,7 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 
-public abstract class Base64Utils {
+public class Base64Utils {
     private static final Charset DEFAULT_CHARSET;
 
     public Base64Utils() {
