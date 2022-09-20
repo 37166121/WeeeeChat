@@ -39,7 +39,7 @@ class ApplicationX : Application() {
     /**
      * 全局异常捕获
      */
-    fun exception() {
+    private fun exception() {
         GlobalExceptionManager
     }
 }

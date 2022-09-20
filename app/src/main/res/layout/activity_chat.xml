@@ -76,52 +76,67 @@
             app:layout_constraintBottom_toTopOf="@+id/navbar"
             app:layout_constraintTop_toBottomOf="@+id/toolbar" />
 
-        <LinearLayout
+        <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/navbar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:minHeight="70dp"
-            android:weightSum="10"
             android:background="@drawable/style_nav_bg"
+            android:minHeight="70dp"
             android:padding="10dp"
-            android:gravity="center"
+            android:weightSum="10"
             app:layout_constraintBottom_toBottomOf="parent">
 
-            <EditText
-                android:id="@+id/chat_enter"
-                android:layout_width="0dp"
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="7"
-                android:textSize="14sp"
-                android:text="@={viewmodel.chatEnter}"
-                android:paddingStart="10dp"
-                android:paddingEnd="10dp"
-                android:paddingTop="10dp"
-                android:paddingBottom="10dp"
-                android:layout_margin="5dp"
-                android:gravity="center|start"
-                android:inputType="text"
-                android:maxLines="1"
-                android:background="@drawable/style_chat_enter_bg" />
+                android:gravity="center"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toTopOf="@+id/emoji_list">
 
-            <ImageView
-                android:id="@+id/emoji"
-                android:layout_width="0dp"
-                android:layout_height="50dp"
-                android:layout_weight="1"
-                android:padding="2dp"
-                android:src="@drawable/ic_emoji" />
+                <EditText
+                    android:id="@+id/chat_enter"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="5dp"
+                    android:layout_weight="7"
+                    android:background="@drawable/style_chat_enter_bg"
+                    android:gravity="center|start"
+                    android:inputType="text"
+                    android:maxLines="1"
+                    android:paddingStart="10dp"
+                    android:paddingTop="10dp"
+                    android:paddingEnd="10dp"
+                    android:paddingBottom="10dp"
+                    android:text="@={viewmodel.chatEnter}"
+                    android:textSize="14sp" />
 
-            <Button
-                android:id="@+id/send"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="2"
-                android:textColor="@color/white"
-                android:background="@drawable/style_send_null_bg"
-                android:layout_margin="5dp"
-                android:text="发送" />
-        </LinearLayout>
+                <ImageView
+                    android:id="@+id/emoji"
+                    android:layout_width="0dp"
+                    android:layout_height="50dp"
+                    android:layout_weight="1"
+                    android:padding="2dp"
+                    android:src="@drawable/ic_emoji" />
+
+                <Button
+                    android:id="@+id/send"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_margin="5dp"
+                    android:layout_weight="2"
+                    android:background="@drawable/style_send_null_bg"
+                    android:text="发送"
+                    android:textColor="@color/white" />
+            </LinearLayout>
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/emoji_list"
+                android:layout_width="match_parent"
+                android:layout_height="120dp"
+                android:visibility="gone"
+                app:layout_constraintBottom_toBottomOf="parent" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

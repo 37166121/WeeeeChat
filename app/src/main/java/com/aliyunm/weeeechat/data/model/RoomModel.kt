@@ -1,5 +1,8 @@
 package com.aliyunm.weeeechat.data.model
 
+import com.aliyunm.weeeechat.SingleLiveEvent
+import java.io.Serializable
+
 data class RoomModel(
     /**
      * 房间id
@@ -12,7 +15,7 @@ data class RoomModel(
     /**
      * 房间在线人数
      */
-    val count : Int = 0,
+    var count : Int = 0,
     /**
      * 房间类型
      */
@@ -20,12 +23,9 @@ data class RoomModel(
     /**
      * 聊天记录
      */
-    val messages : ArrayList<ChatModel> = arrayListOf(),
-    /**
-     * 在房间里面的用户
-     */
-    val users : ArrayList<UserModel> = arrayListOf()
-) {
+    val messages : ArrayList<ChatModel> = arrayListOf()
+) : Serializable {
+
     companion object {
         /**
          * 房间

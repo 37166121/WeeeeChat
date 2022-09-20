@@ -26,12 +26,4 @@ class RoomViewModel : ViewModel() {
             callback(it)
         }
     }
-
-    fun getRoom(rid : Int, callback : (Int) -> Unit) {
-        viewModelScope.launch {
-            Service.getRoom(rid) {
-                callback(it)
-            }
-        }
-    }
 }

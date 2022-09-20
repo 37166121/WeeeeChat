@@ -8,7 +8,6 @@ import com.aliyunm.weeeechat.data.model.MessageModel
 import com.aliyunm.weeeechat.network.socket.SocketManage
 
 class ChatViewModel : ViewModel() {
-    lateinit var name : String
     var rid : Int = 0
     lateinit var uid : String
     val chatEnter : MutableLiveData<String> = MutableLiveData()

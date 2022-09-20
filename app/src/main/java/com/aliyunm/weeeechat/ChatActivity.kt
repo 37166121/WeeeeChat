@@ -1,32 +1,64 @@
 package com.aliyunm.weeeechat
 
 import android.view.KeyEvent
+import android.view.View
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.aliyunm.weeeechat.adapter.ChatListAdapter
+import com.aliyunm.weeeechat.adapter.EmojiAdapter
 import com.aliyunm.weeeechat.base.BaseActivity
 import com.aliyunm.weeeechat.data.model.ChatModel
 import com.aliyunm.weeeechat.data.model.MessageModel
+import com.aliyunm.weeeechat.data.model.RoomModel
 import com.aliyunm.weeeechat.databinding.ActivityChatBinding
 import com.aliyunm.weeeechat.network.socket.SocketManage
 import com.aliyunm.weeeechat.network.socket.SocketManage.addNotice
+import com.aliyunm.weeeechat.util.KeyboardUtil
+import com.aliyunm.weeeechat.util.KeyboardUtil.getKeyboardHeight
+import com.aliyunm.weeeechat.util.ScreenUtil.getNavigationBarHeight
+import com.aliyunm.weeeechat.util.ScreenUtil.getStatusBarHeight
 import com.aliyunm.weeeechat.viewmodel.ChatViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 class ChatActivity : BaseActivity<ActivityChatBinding, ChatViewModel>() {
-
+    private lateinit var room : RoomModel
     private val chats : ArrayList<ChatModel> = arrayListOf()
-    private lateinit var adapter : ChatListAdapter
+    private lateinit var chatListAdapter : ChatListAdapter
+    private lateinit var emojiAdapter : EmojiAdapter
 
     override fun initData() {
-        adapter = ChatListAdapter(chats)
-        chats.addAll(SocketManage.room_chats)
+        getKeyboardHeight(this)
+        chats.addAll(SocketManage.roomChats)
+        chatListAdapter = ChatListAdapter(chats)
+        emojiAdapter = EmojiAdapter {
+            viewBinding.apply {
+                chatEnter.setText("${chatEnter.text}${it}")
+                chatEnter.setSelection(chatEnter.text.length)
+            }
+        }
+
+        SocketManage._roomManager.observe(this) {
+            SocketManage.roomManager.forEach {
+                if (it.rid == room.rid) {
+                    viewBinding.roomQuantity.text = "${it.count}人在线"
+                }
+            }
+        }
+
         viewModel.apply {
-            rid = intent.getIntExtra("rid", 0)
-            uid = intent.getStringExtra("uid") ?: ""
-            name = intent.getStringExtra("name") ?: ""
+
+            intent.apply {
+                rid = getIntExtra("rid", 0)
+                uid = getStringExtra("uid") ?: ""
+                SocketManage.roomManager.forEach {
+                    if (it.rid == rid) {
+                        room = it
+                    }
+                }
+            }
+
             onMessage(this@ChatActivity) {
                 if (uid != "") {
                     // 私聊 比较toUid是否相同
@@ -40,7 +72,7 @@ class ChatActivity : BaseActivity<ActivityChatBinding, ChatViewModel>() {
                     }
                 }
                 CoroutineScope(Dispatchers.Main).launch {
-                    adapter.notifyItemInserted(chats.size - 1)
+                    chatListAdapter.notifyItemInserted(chats.size - 1)
                     viewBinding.chatList.scrollToPosition(chats.size - 1)
                 }
             }
@@ -51,6 +83,15 @@ class ChatActivity : BaseActivity<ActivityChatBinding, ChatViewModel>() {
 
         viewBinding.apply {
 
+            viewmodel = viewModel
+
+            // 大厅和私聊不显示人数
+            if (viewModel.rid == 0) {
+                roomQuantity.visibility = View.GONE
+            } else {
+                roomQuantity.text = "${room.count}人在线"
+            }
+
             viewModel.chatEnter.observe(this@ChatActivity) {
                 send.setBackgroundResource(if (it.isBlank()) {
                     R.drawable.style_send_null_bg
@@ -59,35 +100,49 @@ class ChatActivity : BaseActivity<ActivityChatBinding, ChatViewModel>() {
                 })
             }
 
-            viewmodel = viewModel
-
             back.apply {
                 setOnClickListener {
                     finish()
                 }
             }
 
-            roomName.text = viewModel.name
+            roomName.apply {
+                text = room.name
+            }
 
             toolbar.apply {
                 post {
-                    minimumHeight += getStatusBarHeight()
+                    minimumHeight += getStatusBarHeight(this@ChatActivity)
                 }
-                setPadding(paddingStart, paddingTop + getStatusBarHeight(), paddingEnd, paddingBottom)
+                setPadding(paddingStart, paddingTop + getStatusBarHeight(this@ChatActivity), paddingEnd, paddingBottom)
             }
 
             chatList.apply {
                 layoutManager = LinearLayoutManager(this@ChatActivity)
-                adapter = this@ChatActivity.adapter
+                adapter = this@ChatActivity.chatListAdapter
                 itemAnimator = null
                 scrollToPosition(chats.size - 1)
             }
 
             navbar.apply {
                 post {
-                    minimumHeight += getNavigationBarHeight()
+                    minimumHeight += getNavigationBarHeight(this@ChatActivity)
                 }
-                setPadding(paddingStart, paddingTop, paddingEnd, paddingBottom + getNavigationBarHeight())
+                setPadding(paddingStart, paddingTop, paddingEnd, paddingBottom + getNavigationBarHeight(this@ChatActivity))
+            }
+
+            emoji.apply {
+
+                var isShow = false
+
+                setOnClickListener {
+                    viewBinding.emojiList.visibility = if (isShow) {
+                        View.GONE
+                    } else {
+                        View.VISIBLE
+                    }
+                    isShow = !isShow
+                }
             }
 
             send.apply {
@@ -95,13 +150,21 @@ class ChatActivity : BaseActivity<ActivityChatBinding, ChatViewModel>() {
                     send()
                 }
             }
+
+            emojiList.apply {
+                post {
+                    minimumHeight = KeyboardUtil.keyboardHeight
+                }
+                layoutManager = LinearLayoutManager(this@ChatActivity)
+                adapter = emojiAdapter
+            }
         }
     }
 
     private fun send() {
         viewModel.apply {
             if ((chatEnter.value ?: "").isNotBlank()) {
-                val message = chatEnter.value ?: ""
+                val message = "${chatEnter.value}"
                 val type: Int
                 val chatModel = if (uid != "") {
                     type = MessageModel.PRIVATE
@@ -112,7 +175,7 @@ class ChatActivity : BaseActivity<ActivityChatBinding, ChatViewModel>() {
                 }
                 sendMessage(type, chatModel) {
                     if (it) {
-                        SocketManage.chats.addNotice(chatModel)
+                        SocketManage.chatManager.addNotice(chatModel)
                     }
                 }
             }

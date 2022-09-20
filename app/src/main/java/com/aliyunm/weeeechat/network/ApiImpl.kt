@@ -1,7 +1,9 @@
 package com.aliyunm.weeeechat.network
 
+import android.util.Log
 import com.aliyunm.weeeechat.BuildConfig
-import com.aliyunm.weeeechat.network.Api.Companion.BASEURL
+import com.aliyunm.weeeechat.network.Api.Companion.DEBUG_BASEURL
+import com.aliyunm.weeeechat.network.Api.Companion.RELEASE_BASEURL
 import okhttp3.*
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
@@ -20,7 +22,7 @@ object ApiImpl {
     val API : Api by lazy {
         val client = getOkHttpClient()
         Retrofit.Builder()
-            .baseUrl(BASEURL)
+            .baseUrl(if (BuildConfig.DEBUG) { DEBUG_BASEURL } else { RELEASE_BASEURL })
             .addConverterFactory(GsonConverterFactory.create())
             .client(client)
             .build()
@@ -71,6 +73,7 @@ object ApiImpl {
         override fun intercept(chain: Interceptor.Chain): Response {
             val request = chain.request()
             val response : Response = chain.proceed(request)
+            Log.i("status code", response.code.toString())
             return response
         }
     }

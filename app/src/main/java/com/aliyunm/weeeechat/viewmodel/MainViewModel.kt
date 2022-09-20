@@ -16,7 +16,7 @@ class MainViewModel : ViewModel() {
     val nickname : MutableLiveData<String> = MutableLiveData()
 
     fun login(userModel: UserModel, callback : (Boolean) -> Unit) {
-        SocketManage._onMessage = {
+        SocketManage.onConnect = {
             if (it as Boolean) {
                 // 保存用户信息 uid 昵称
                 SharedPreferencesUtil.putString("uid", userModel.uid)

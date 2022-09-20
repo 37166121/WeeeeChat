@@ -2,6 +2,7 @@ package com.aliyunm.weeeechat.util
 
 import com.google.gson.Gson
 import com.google.gson.internal.Primitives
+import com.google.gson.reflect.TypeToken
 import java.io.StringReader
 import java.lang.reflect.Type
 
@@ -21,6 +22,11 @@ object GsonUtil {
     fun <T> fromJson(json: String, clazz: Class<T>): T {
         val o = gson.fromJson<Any>(json, clazz as Type)
         return Primitives.wrap(clazz).cast(o)
+    }
+
+    fun <T> fromJson(json: String): T {
+        val type: Type = object : TypeToken<T>() {}.type
+        return fromJson(json, type)
     }
 
     fun <T> fromJson(json: String, type: Type): T {

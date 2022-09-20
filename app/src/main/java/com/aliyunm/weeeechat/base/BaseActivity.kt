@@ -1,6 +1,5 @@
 package com.aliyunm.weeeechat.base
 
-import android.graphics.Color
 import android.os.Bundle
 import android.view.MotionEvent
 import android.view.View
@@ -8,6 +7,7 @@ import android.widget.EditText
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModel
 import androidx.viewbinding.ViewBinding
+import com.aliyunm.weeeechat.util.ScreenUtil.fullScreen
 import com.blankj.utilcode.util.KeyboardUtils
 
 abstract class BaseActivity<VB : ViewBinding, VM : ViewModel> : AppCompatActivity() {
@@ -22,7 +22,7 @@ abstract class BaseActivity<VB : ViewBinding, VM : ViewModel> : AppCompatActivit
         viewModel = getViewModel_()
         initData()
         initView()
-        fullScreen()
+        fullScreen(window)
     }
 
     abstract fun initData()
@@ -32,35 +32,6 @@ abstract class BaseActivity<VB : ViewBinding, VM : ViewModel> : AppCompatActivit
     abstract fun getViewBinding_(): VB
 
     abstract fun getViewModel_(): VM
-
-    /**
-     * 全屏
-     */
-    private fun fullScreen() {
-        window.apply {
-            setDecorFitsSystemWindows(false)
-            statusBarColor = Color.TRANSPARENT
-            navigationBarColor = Color.TRANSPARENT
-        }
-    }
-
-    /**
-     * 获取导航栏高度
-     */
-    fun getNavigationBarHeight(): Int {
-        val resourceId: Int = resources.getIdentifier("navigation_bar_height", "dimen", "android")
-        val height: Int = resources.getDimensionPixelSize(resourceId)
-        return height
-    }
-
-    /**
-     * 获取状态栏高度
-     */
-    fun getStatusBarHeight(): Int {
-        val resourceId: Int = resources.getIdentifier("status_bar_height", "dimen", "android")
-        val height: Int = resources.getDimensionPixelSize(resourceId)
-        return height
-    }
 
     override fun dispatchTouchEvent(ev: MotionEvent): Boolean {
         if (ev.action == MotionEvent.ACTION_DOWN) {

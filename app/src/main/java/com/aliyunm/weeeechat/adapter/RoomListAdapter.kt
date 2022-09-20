@@ -57,9 +57,8 @@ class RoomListAdapter(val data : ArrayList<RoomModel>) : RecyclerView.Adapter<Ro
                 uid = chat.uid
             }
             val intent = Intent(mContext, ChatActivity::class.java)
-            SocketManage.room_chats.clear()
-            SocketManage.room_chats.addAll(room.messages)
-            intent.putExtra("name", room.name)
+            SocketManage.roomChats.clear()
+            SocketManage.roomChats.addAll(room.messages)
             intent.putExtra("rid", rid)
             intent.putExtra("uid", uid)
             mContext.startActivity(intent)
