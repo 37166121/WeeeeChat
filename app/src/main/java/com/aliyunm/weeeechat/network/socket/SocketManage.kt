@@ -10,6 +10,7 @@ import com.aliyunm.weeeechat.data.model.MessageModel.Companion.ENTER_ROOM
 import com.aliyunm.weeeechat.data.model.MessageModel.Companion.OFFLINE
 import com.aliyunm.weeeechat.data.model.MessageModel.Companion.QUIT_ROOM
 import com.aliyunm.weeeechat.data.model.RoomModel
+import com.aliyunm.weeeechat.data.repository.DatabaseHelper
 import com.aliyunm.weeeechat.network.Api
 import com.aliyunm.weeeechat.util.GsonUtil
 import com.aliyunm.weeeechat.util.MessageUtil
@@ -23,55 +24,70 @@ import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.io.OutputStreamWriter
 import java.io.PrintWriter
+import java.util.ArrayList
 import java.lang.reflect.Type
 import java.net.Socket
 import kotlin.properties.Delegates
 
 object SocketManage {
 
-    var socket : Socket? = null
+    var socket: Socket? = null
 
     /**
      * 读取数据的输入流
      */
-    private lateinit var reader : BufferedReader
+    private lateinit var reader: BufferedReader
 
     /**
      * 写数据的输出流
      */
-    private lateinit var writer : PrintWriter
+    private lateinit var writer: PrintWriter
 
     /**
      * 服务器公钥
      */
-    var publicKey : String = ""
+    var publicKey: String = ""
 
     /**
      * 收到消息发出通知
      */
-    var onConnect : (Any) -> Unit = {}
+    var onConnect: (Boolean) -> Unit = {}
 
-    var message : ChatModel by Delegates.observable(ChatModel()) { property, oldValue, newValue ->
-        chatManager.addNotice(newValue)
+    var message: ChatModel by Delegates.observable(ChatModel()) { property, oldValue, newValue ->
+        chatManager.addChat(newValue)
     }
 
     /**
      * 房间列表
      */
-    val roomManager : ArrayList<RoomModel> = arrayListOf(RoomModel(0, "大厅"))
+    val roomManager: ArrayList<RoomModel> = arrayListOf(RoomModel(rid = 0, name = "大厅"))
 
     /**
      * 收到消息后发布通知
+     * true : 自己进入房间
+     * false : 其他人进入房间或者自己退出房间
      */
-    val _roomManager : SingleLiveEvent<Boolean> = SingleLiveEvent()
+    val roomMessage: SingleLiveEvent<Boolean> = SingleLiveEvent()
 
     /**
      * 全局聊天记录
      */
-    val chatManager : ArrayList<ChatModel> = arrayListOf()
+    val chatManager: ArrayList<ChatModel> = arrayListOf<ChatModel>().apply {
+        DatabaseHelper.getAllChat().forEach {
+            add(it)
+        }
+    }
 
-    fun ArrayList<ChatModel>.addNotice(chat : ChatModel) {
-        this.add(chat)
+    /**
+     * 收到消息后发布通知
+     */
+    val chatMessage: SingleLiveEvent<ChatModel> = SingleLiveEvent()
+
+    fun ArrayList<ChatModel>.addChat(chat: ChatModel) {
+        add(chat)
+        if (chat.content.isNotBlank()) {
+            DatabaseHelper.insertChat(chat)
+        }
         roomManager.forEach {
             if (chat.uid.isNotBlank()) {
 
@@ -86,25 +102,40 @@ object SocketManage {
         }
     }
 
+    fun ArrayList<RoomModel>.addRoom(room: RoomModel) {
+        DatabaseHelper.getAllChat().forEach {
+            if (room.rid == it.rid) {
+                room.messages.add(it)
+            }
+        }
+        add(room)
+    }
+
+    fun ArrayList<RoomModel>.default() {
+        clear()
+        add(RoomModel(rid = 0, name = "大厅"))
+    }
+
     /**
      * 房间内的聊天记录
      */
-    val roomChats : ArrayList<ChatModel> = arrayListOf()
-
-    /**
-     * 收到消息后发布通知
-     */
-    val chatMessage : SingleLiveEvent<ChatModel> = SingleLiveEvent()
+    val roomChats: ArrayList<ChatModel> = arrayListOf()
 
     /**
      * 连接socket服务器
      */
-    fun connect(callback : (Boolean) -> Unit) {
+    fun connect(callback: (Boolean) -> Unit) {
         val job = CoroutineScope(Dispatchers.IO).launch {
             try {
                 Log.i(this::class.java.name, "连接服务器")
                 // 连接服务器
-                socket = Socket(if (BuildConfig.DEBUG) { Api.DEBUG_IP } else { Api.RELEASE_IP }, Api.SOCKET_PORT)
+                socket = Socket(
+                    if (BuildConfig.DEBUG) {
+                        Api.DEBUG_IP
+                    } else {
+                        Api.RELEASE_IP
+                    }, Api.SOCKET_PORT
+                )
                 // 第一次访问服务器返回公钥
                 writer = PrintWriter(OutputStreamWriter(socket?.getOutputStream(), "UTF-8"))
                 reader = BufferedReader(InputStreamReader(socket?.getInputStream(), "UTF-8"))
@@ -138,45 +169,54 @@ object SocketManage {
     /**
      * 收到消息
      */
-    private fun onMessage(message : String) {
+    private fun onMessage(message: String) {
         Log.i(this::class.java.name, "收到消息")
         val s: List<String> = message.split("--------------------------")
         val messageModel = GsonUtil.fromJson(MessageUtil.decode(s[0], s[1]), MessageModel::class.java)
-        when(messageModel.type) {
+        when (messageModel.type) {
+
             // 收到服务器返回登录消息
             CONNECT -> {
                 onConnect(true)
             }
 
+            // 收到进入房间消息
             ENTER_ROOM -> {
-                val roomModel : RoomModel = setRoomModel(GsonUtil.toJson(messageModel.content ?: ""))
+                val roomModel: RoomModel = setRoomModel(GsonUtil.toJson(messageModel.content ?: ""))
                 if (roomModel.messages.isEmpty()) {
-                    roomManager.add(roomModel)
-                    _roomManager.postValue(true)
+                    // 自己进入房间
+                    if (DatabaseHelper.getRoom(roomModel.rid) == null) {
+                        DatabaseHelper.insertRoom(roomModel)
+                    }
+                    roomManager.addRoom(roomModel)
+                    roomMessage.postValue(true)
                 } else {
+                    // 其他人进入房间
                     roomManager.forEach {
                         if (it.rid == roomModel.rid) {
+                            // 房间人数+1
                             it.count++
                         }
                     }
-                    _roomManager.postValue(false)
+                    roomMessage.postValue(false)
                     this.message = roomModel.messages[0]
                 }
             }
 
+            // 收到退出房间消息
             QUIT_ROOM -> {
-                val chatModel : ChatModel = setChatModel(GsonUtil.toJson(messageModel.content ?: ""))
+                val chatModel: ChatModel = setChatModel(GsonUtil.toJson(messageModel.content ?: ""))
                 roomManager.forEach {
                     if (it.rid == chatModel.rid) {
                         it.count--
                     }
                 }
-                _roomManager.postValue(false)
+                roomMessage.postValue(false)
                 this.message = chatModel
             }
 
             else -> {
-                val chatModel : ChatModel = setChatModel(GsonUtil.toJson(messageModel.content ?: ""))
+                val chatModel: ChatModel = setChatModel(GsonUtil.toJson(messageModel.content ?: ""))
                 this.message = chatModel
             }
         }
@@ -185,7 +225,7 @@ object SocketManage {
     /**
      * 发送消息
      */
-    fun<T> sendMessage(message: MessageModel<T>, callback : (Boolean) -> Unit = {}) {
+    fun <T> sendMessage(message: MessageModel<T>, callback: (Boolean) -> Unit = {}) {
         Log.i(this::class.java.name, "发送消息")
         CoroutineScope(Dispatchers.IO).launch {
             if (socket?.isClosed == false && socket?.isConnected == true) {
@@ -194,7 +234,7 @@ object SocketManage {
                 writer.flush()
                 callback(true)
             } else {
-                // 连接已断开
+                // 连接已断开 重连
                 connect {
                     if (it) {
                         sendMessage(message)
@@ -217,7 +257,7 @@ object SocketManage {
     /**
      * 关闭当前socket连接
      */
-    fun onClose(callback : (Boolean) -> Unit = {}) {
+    fun onClose(callback: (Boolean) -> Unit = {}) {
         println("断开连接")
         sendMessage(MessageModel(OFFLINE, true)) {
             socket?.close()

@@ -17,7 +17,7 @@ class MainViewModel : ViewModel() {
 
     fun login(userModel: UserModel, callback : (Boolean) -> Unit) {
         SocketManage.onConnect = {
-            if (it as Boolean) {
+            if (it) {
                 // 保存用户信息 uid 昵称
                 SharedPreferencesUtil.putString("uid", userModel.uid)
                     .putString("nickname", userModel.nickname)
@@ -25,7 +25,9 @@ class MainViewModel : ViewModel() {
             }
             callback(it)
         }
-        SocketManage.sendMessage(MessageModel(type = CONNECT, content = userModel))
+        SocketManage.sendMessage(MessageModel(type = CONNECT, content = userModel)) {
+
+        }
     }
 
     fun getPublicKey(callback : () -> Unit) {

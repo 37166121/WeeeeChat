@@ -51,5 +51,11 @@ object Emoji {
         "\uD83E\uDD14"
     )
 
-    val emoji = arrayListOf(GRINNING, SMILING, TONGUE)
+    val emoji = arrayListOf<String>()
+
+    init {
+        emoji.addAll(GRINNING)
+        emoji.addAll(SMILING)
+        emoji.addAll(TONGUE)
+    }
 }

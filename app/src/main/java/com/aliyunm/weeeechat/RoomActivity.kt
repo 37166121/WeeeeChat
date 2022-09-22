@@ -42,7 +42,7 @@ class RoomActivity : BaseActivity<ActivityRoomBinding, RoomViewModel>() {
                 }
             }
         }
-        SocketManage._roomManager.observe(this) {
+        SocketManage.roomMessage.observe(this) {
             if (it) {
                 CoroutineScope(Dispatchers.Main).launch {
                     adapter.notifyItemInserted(rooms.size - 1)
@@ -93,7 +93,6 @@ class RoomActivity : BaseActivity<ActivityRoomBinding, RoomViewModel>() {
     override fun onKeyUp(keyCode: Int, event: KeyEvent): Boolean {
         if (keyCode == KeyEvent.KEYCODE_ENTER) {
             viewBinding.search.apply {
-                // rooms.add(RoomModel(rid = text.toString().toInt(), name = text.toString()))
                 viewModel.enterRoom(ChatModel(type = MessageModel.ENTER_ROOM, rid = text.toString().toInt())) {}
                 setText("")
                 clearFocus()

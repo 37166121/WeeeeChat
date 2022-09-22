@@ -1,38 +1,38 @@
 package com.aliyunm.weeeechat.adapter
 
-import android.content.Context
+import android.view.Gravity.CENTER
 import android.view.View
 import android.view.ViewGroup
-import android.view.ViewGroup.LayoutParams
-import androidx.recyclerview.widget.GridLayoutManager
+import android.widget.TextView
+import androidx.core.view.setPadding
 import androidx.recyclerview.widget.RecyclerView
-import androidx.recyclerview.widget.RecyclerView.Adapter
-import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import com.aliyunm.weeeechat.data.model.Emoji
-import com.aliyunm.weeeechat.util.ScaleUtil.dp2Px
 
-class EmojiAdapter(val callback : (String) -> Unit) : Adapter<EmojiAdapter.EmojiViewHolder>() {
+class EmojiAdapter(val callback : (String) -> Unit) : RecyclerView.Adapter<EmojiAdapter.EmojiItemViewHolder>() {
 
-    private lateinit var context : Context
-
-    class EmojiViewHolder(itemView: View) : ViewHolder(itemView) {
-        val item : RecyclerView = itemView as RecyclerView
+    class EmojiItemViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+        val item : TextView = itemView as TextView
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): EmojiViewHolder {
-        context = parent.context
-        val view = RecyclerView(parent.context).apply {
-            layoutParams = LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT)
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): EmojiItemViewHolder {
+        val view : TextView = TextView(parent.context).apply {
+            layoutParams = ViewGroup.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+            )
         }
-        return EmojiViewHolder(view)
+        return EmojiItemViewHolder(view)
     }
 
-    override fun onBindViewHolder(holder: EmojiViewHolder, position: Int) {
+    override fun onBindViewHolder(holder: EmojiItemViewHolder, position: Int) {
         holder.apply {
             item.apply {
-                layoutManager = GridLayoutManager(context, 7)
-                adapter = EmojiItemAdapter(Emoji.emoji[position]) {
-                    callback(it)
+                textSize = 20f
+                setPadding(10)
+                gravity = CENTER
+                text = Emoji.emoji[position]
+                setOnClickListener {
+                    callback(Emoji.emoji[position])
                 }
             }
         }

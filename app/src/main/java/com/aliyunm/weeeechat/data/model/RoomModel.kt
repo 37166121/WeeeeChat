@@ -1,30 +1,40 @@
 package com.aliyunm.weeeechat.data.model
 
-import com.aliyunm.weeeechat.SingleLiveEvent
+import androidx.room.ColumnInfo
+import androidx.room.Entity
+import androidx.room.Ignore
+import androidx.room.PrimaryKey
 import java.io.Serializable
+import java.util.UUID
 
+@Entity(tableName = "room")
 data class RoomModel(
+    /**
+     * 主键
+     */
+    @PrimaryKey var id : String = UUID.randomUUID().toString(),
     /**
      * 房间id
      */
-    val rid : Int,
+    @ColumnInfo var rid : Int = 0,
     /**
      * 房间名称
      */
-    val name : String,
+    @ColumnInfo var name : String = "",
     /**
      * 房间在线人数
      */
-    var count : Int = 0,
+    @ColumnInfo var count : Int = 0,
     /**
      * 房间类型
      */
-    val type : Int = ROOM,
+    @ColumnInfo var type : Int = ROOM
+) : Serializable {
+
     /**
      * 聊天记录
      */
-    val messages : ArrayList<ChatModel> = arrayListOf()
-) : Serializable {
+    @Ignore var messages : ArrayList<ChatModel> = arrayListOf()
 
     companion object {
         /**

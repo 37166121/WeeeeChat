@@ -14,7 +14,7 @@ class ChatViewModel : ViewModel() {
 
     fun onMessage(owner : LifecycleOwner, callback : (ChatModel) -> Unit) {
         SocketManage.chatMessage.observe(owner) {
-            callback(it as ChatModel)
+            callback(it)
         }
     }
 

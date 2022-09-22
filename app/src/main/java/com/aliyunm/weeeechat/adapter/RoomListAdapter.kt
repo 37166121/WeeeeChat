@@ -13,6 +13,7 @@ import com.aliyunm.weeeechat.R
 import com.aliyunm.weeeechat.data.model.ChatModel
 import com.aliyunm.weeeechat.data.model.MessageModel
 import com.aliyunm.weeeechat.data.model.RoomModel
+import com.aliyunm.weeeechat.data.repository.DatabaseHelper
 import com.aliyunm.weeeechat.network.socket.SocketManage
 
 class RoomListAdapter(val data : ArrayList<RoomModel>) : RecyclerView.Adapter<RoomListAdapter.MessageViewHolder>() {
@@ -38,14 +39,16 @@ class RoomListAdapter(val data : ArrayList<RoomModel>) : RecyclerView.Adapter<Ro
         holder.name.text = room.name
         if (room.messages.size != 0) {
             val chat = room.messages.last()
-            holder.message.text = "${chat.user.nickname}:${chat.content}"
+            holder.message.text = "${chat.nickname}:${chat.content}"
             holder.time.text = timeFormat(chat.time)
         }
         if (position != 0) {
             holder.itemView.setOnLongClickListener {
                 data.removeAt(position)
                 notifyItemRemoved(position)
-                SocketManage.sendMessage(MessageModel(type = MessageModel.QUIT_ROOM, content = ChatModel(type = MessageModel.QUIT_ROOM, rid = room.rid)))
+                SocketManage.sendMessage(MessageModel(type = MessageModel.QUIT_ROOM, content = ChatModel(type = MessageModel.QUIT_ROOM, rid = room.rid))) {
+                    DatabaseHelper.deleteRoom(room)
+                }
                 return@setOnLongClickListener true
             }
         }

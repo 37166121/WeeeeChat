@@ -3,6 +3,7 @@ package com.aliyunm.weeeechat
 import android.view.KeyEvent
 import android.view.View
 import androidx.lifecycle.ViewModelProvider
+import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.aliyunm.weeeechat.adapter.ChatListAdapter
 import com.aliyunm.weeeechat.adapter.EmojiAdapter
@@ -12,7 +13,7 @@ import com.aliyunm.weeeechat.data.model.MessageModel
 import com.aliyunm.weeeechat.data.model.RoomModel
 import com.aliyunm.weeeechat.databinding.ActivityChatBinding
 import com.aliyunm.weeeechat.network.socket.SocketManage
-import com.aliyunm.weeeechat.network.socket.SocketManage.addNotice
+import com.aliyunm.weeeechat.network.socket.SocketManage.addChat
 import com.aliyunm.weeeechat.util.KeyboardUtil
 import com.aliyunm.weeeechat.util.KeyboardUtil.getKeyboardHeight
 import com.aliyunm.weeeechat.util.ScreenUtil.getNavigationBarHeight
@@ -39,7 +40,7 @@ class ChatActivity : BaseActivity<ActivityChatBinding, ChatViewModel>() {
             }
         }
 
-        SocketManage._roomManager.observe(this) {
+        SocketManage.roomMessage.observe(this) {
             SocketManage.roomManager.forEach {
                 if (it.rid == room.rid) {
                     viewBinding.roomQuantity.text = "${it.count}人在线"
@@ -117,18 +118,18 @@ class ChatActivity : BaseActivity<ActivityChatBinding, ChatViewModel>() {
                 setPadding(paddingStart, paddingTop + getStatusBarHeight(this@ChatActivity), paddingEnd, paddingBottom)
             }
 
-            chatList.apply {
-                layoutManager = LinearLayoutManager(this@ChatActivity)
-                adapter = this@ChatActivity.chatListAdapter
-                itemAnimator = null
-                scrollToPosition(chats.size - 1)
-            }
-
             navbar.apply {
                 post {
                     minimumHeight += getNavigationBarHeight(this@ChatActivity)
                 }
                 setPadding(paddingStart, paddingTop, paddingEnd, paddingBottom + getNavigationBarHeight(this@ChatActivity))
+            }
+
+            chatList.apply {
+                layoutManager = LinearLayoutManager(this@ChatActivity)
+                adapter = this@ChatActivity.chatListAdapter
+                itemAnimator = null
+                scrollToPosition(chats.size - 1)
             }
 
             emoji.apply {
@@ -155,7 +156,7 @@ class ChatActivity : BaseActivity<ActivityChatBinding, ChatViewModel>() {
                 post {
                     minimumHeight = KeyboardUtil.keyboardHeight
                 }
-                layoutManager = LinearLayoutManager(this@ChatActivity)
+                layoutManager = GridLayoutManager(context, 7)
                 adapter = emojiAdapter
             }
         }
@@ -165,17 +166,10 @@ class ChatActivity : BaseActivity<ActivityChatBinding, ChatViewModel>() {
         viewModel.apply {
             if ((chatEnter.value ?: "").isNotBlank()) {
                 val message = "${chatEnter.value}"
-                val type: Int
-                val chatModel = if (uid != "") {
-                    type = MessageModel.PRIVATE
-                    ChatModel(content = message, uid = uid)
-                } else {
-                    type = MessageModel.SPECIFY
-                    ChatModel(content = message, rid = rid)
-                }
-                sendMessage(type, chatModel) {
+                val chatModel = ChatModel(content = message, uid = uid, type = if (uid != "") { MessageModel.PRIVATE } else { MessageModel.SPECIFY })
+                sendMessage(chatModel.type, chatModel) {
                     if (it) {
-                        SocketManage.chatManager.addNotice(chatModel)
+                        SocketManage.chatManager.addChat(chatModel)
                     }
                 }
             }

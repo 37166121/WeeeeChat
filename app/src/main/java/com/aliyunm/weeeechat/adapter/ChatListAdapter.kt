@@ -61,11 +61,11 @@ class ChatListAdapter(val data : ArrayList<ChatModel>) : RecyclerView.Adapter<Re
         when(holder) {
 
             is ChatViewHolder -> {
-                if (chat.user.uid == uid) {
+                if (chat.fromUid == uid) {
                     holder.apply {
                         self.visibility = View.VISIBLE
                         other.visibility = View.GONE
-                        name_self.text = chat.user.nickname
+                        name_self.text = chat.nickname
                         message_self.setText(chat.content)
                         time_self.text = timeFormat(chat.time)
                     }
@@ -73,7 +73,7 @@ class ChatListAdapter(val data : ArrayList<ChatModel>) : RecyclerView.Adapter<Re
                     holder.apply {
                         self.visibility = View.GONE
                         other.visibility = View.VISIBLE
-                        name_other.text = chat.user.nickname
+                        name_other.text = chat.nickname
                         message_other.setText(chat.content)
                         time_other.text = timeFormat(chat.time)
                     }
@@ -81,7 +81,7 @@ class ChatListAdapter(val data : ArrayList<ChatModel>) : RecyclerView.Adapter<Re
             }
 
             is EnterRoomViewHolder -> {
-                holder.enter_room.text = "${chat.user.nickname}${if (chat.type == MessageModel.ENTER_ROOM) "进入" else "退出"}房间"
+                holder.enter_room.text = "${chat.nickname}${if (chat.type == MessageModel.ENTER_ROOM) "进入" else "退出"}房间"
             }
         }
     }
