@@ -5,9 +5,12 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.aliyunm.weeeechat.data.model.ChatModel
 import com.aliyunm.weeeechat.data.model.MessageModel
+import com.aliyunm.weeeechat.data.model.RoomModel
 import com.aliyunm.weeeechat.network.socket.SocketManage
 
 class ChatViewModel : ViewModel() {
+    lateinit var room : RoomModel
+    val chats : ArrayList<ChatModel> = arrayListOf()
     var rid : Int = 0
     lateinit var uid : String
     val chatEnter : MutableLiveData<String> = MutableLiveData()

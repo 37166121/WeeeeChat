@@ -1,14 +1,14 @@
-package com.aliyunm.weeeechat
+package com.aliyunm.weeeechat.activity
 
 import android.content.Intent
 import android.widget.Toast
 import androidx.lifecycle.ViewModelProvider
+import com.aliyunm.weeeechat.R
 import com.aliyunm.weeeechat.base.BaseActivity
 import com.aliyunm.weeeechat.data.model.UserModel
 import com.aliyunm.weeeechat.data.repository.DatabaseHelper
 import com.aliyunm.weeeechat.databinding.ActivityMainBinding
 import com.aliyunm.weeeechat.network.socket.SocketManage
-import com.aliyunm.weeeechat.network.socket.SocketManage.default
 import com.aliyunm.weeeechat.util.RSAUtil
 import com.aliyunm.weeeechat.util.SharedPreferencesUtil
 import com.aliyunm.weeeechat.viewmodel.MainViewModel
@@ -36,8 +36,7 @@ class MainActivity : BaseActivity<ActivityMainBinding, MainViewModel>() {
         CoroutineScope(Dispatchers.IO).launch {
             SharedPreferencesUtil.remove("uid", "nickname")
             DatabaseHelper.deleteAll()
-            SocketManage.roomManager.default()
-            SocketManage.chatManager.clear()
+            SocketManage.clear()
         }
     }
 
@@ -57,7 +56,7 @@ class MainActivity : BaseActivity<ActivityMainBinding, MainViewModel>() {
         }
     }
 
-    private fun login(uid : String, nickname : String) {
+    private fun login(uid: String, nickname: String) {
         if (SocketManage.publicKey.isNotBlank()) {
             if (uid.isNotBlank() && nickname.isNotBlank()) {
                 viewModel.login(UserModel(uid, nickname, RSAUtil.getPublicToBase64String())) {
@@ -73,7 +72,7 @@ class MainActivity : BaseActivity<ActivityMainBinding, MainViewModel>() {
         }
     }
 
-    private fun next(connect : Boolean) {
+    private fun next(connect: Boolean) {
         if (connect) {
             val intent = Intent(this@MainActivity, RoomActivity::class.java)
             startActivity(intent)

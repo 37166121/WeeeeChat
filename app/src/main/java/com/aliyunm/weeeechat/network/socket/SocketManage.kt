@@ -1,7 +1,6 @@
 package com.aliyunm.weeeechat.network.socket
 
 import android.util.Log
-import com.aliyunm.weeeechat.BuildConfig
 import com.aliyunm.weeeechat.SingleLiveEvent
 import com.aliyunm.weeeechat.data.model.ChatModel
 import com.aliyunm.weeeechat.data.model.MessageModel
@@ -12,6 +11,7 @@ import com.aliyunm.weeeechat.data.model.MessageModel.Companion.QUIT_ROOM
 import com.aliyunm.weeeechat.data.model.RoomModel
 import com.aliyunm.weeeechat.data.repository.DatabaseHelper
 import com.aliyunm.weeeechat.network.Api
+import com.aliyunm.weeeechat.network.Service.getIP
 import com.aliyunm.weeeechat.util.GsonUtil
 import com.aliyunm.weeeechat.util.MessageUtil
 import com.google.gson.Gson
@@ -53,14 +53,10 @@ object SocketManage {
      */
     var onConnect: (Boolean) -> Unit = {}
 
-    var message: ChatModel by Delegates.observable(ChatModel()) { property, oldValue, newValue ->
-        chatManager.addChat(newValue)
-    }
-
     /**
      * 房间列表
      */
-    val roomManager: ArrayList<RoomModel> = arrayListOf(RoomModel(rid = 0, name = "大厅"))
+    val roomManager: ArrayList<RoomModel> = arrayListOf(RoomModel(rid = 0, name = "广场"))
 
     /**
      * 收到消息后发布通知
@@ -85,9 +81,11 @@ object SocketManage {
 
     fun ArrayList<ChatModel>.addChat(chat: ChatModel) {
         add(chat)
+        // 数据库中过滤掉进入退出房间消息
         if (chat.content.isNotBlank()) {
             DatabaseHelper.insertChat(chat)
         }
+        // 将消息添加到roomManager中
         roomManager.forEach {
             if (chat.uid.isNotBlank()) {
 
@@ -97,12 +95,11 @@ object SocketManage {
                 }
             }
         }
-        CoroutineScope(Dispatchers.Main).launch {
-            chatMessage.value = chat
-        }
+        chatMessage.postValue(chat)
     }
 
     fun ArrayList<RoomModel>.addRoom(room: RoomModel) {
+        // 如果以前在这个房间有聊天记录 进入房间后恢复记录
         DatabaseHelper.getAllChat().forEach {
             if (room.rid == it.rid) {
                 room.messages.add(it)
@@ -110,16 +107,6 @@ object SocketManage {
         }
         add(room)
     }
-
-    fun ArrayList<RoomModel>.default() {
-        clear()
-        add(RoomModel(rid = 0, name = "大厅"))
-    }
-
-    /**
-     * 房间内的聊天记录
-     */
-    val roomChats: ArrayList<ChatModel> = arrayListOf()
 
     /**
      * 连接socket服务器
@@ -129,13 +116,7 @@ object SocketManage {
             try {
                 Log.i(this::class.java.name, "连接服务器")
                 // 连接服务器
-                socket = Socket(
-                    if (BuildConfig.DEBUG) {
-                        Api.DEBUG_IP
-                    } else {
-                        Api.RELEASE_IP
-                    }, Api.SOCKET_PORT
-                )
+                socket = Socket(getIP(), Api.SOCKET_PORT)
                 // 第一次访问服务器返回公钥
                 writer = PrintWriter(OutputStreamWriter(socket?.getOutputStream(), "UTF-8"))
                 reader = BufferedReader(InputStreamReader(socket?.getInputStream(), "UTF-8"))
@@ -183,41 +164,18 @@ object SocketManage {
             // 收到进入房间消息
             ENTER_ROOM -> {
                 val roomModel: RoomModel = setRoomModel(GsonUtil.toJson(messageModel.content ?: ""))
-                if (roomModel.messages.isEmpty()) {
-                    // 自己进入房间
-                    if (DatabaseHelper.getRoom(roomModel.rid) == null) {
-                        DatabaseHelper.insertRoom(roomModel)
-                    }
-                    roomManager.addRoom(roomModel)
-                    roomMessage.postValue(true)
-                } else {
-                    // 其他人进入房间
-                    roomManager.forEach {
-                        if (it.rid == roomModel.rid) {
-                            // 房间人数+1
-                            it.count++
-                        }
-                    }
-                    roomMessage.postValue(false)
-                    this.message = roomModel.messages[0]
-                }
+                enterRoom(roomModel)
             }
 
             // 收到退出房间消息
             QUIT_ROOM -> {
                 val chatModel: ChatModel = setChatModel(GsonUtil.toJson(messageModel.content ?: ""))
-                roomManager.forEach {
-                    if (it.rid == chatModel.rid) {
-                        it.count--
-                    }
-                }
-                roomMessage.postValue(false)
-                this.message = chatModel
+                quitRoom(chatModel)
             }
 
             else -> {
                 val chatModel: ChatModel = setChatModel(GsonUtil.toJson(messageModel.content ?: ""))
-                this.message = chatModel
+                chatManager.addChat(chatModel)
             }
         }
     }
@@ -244,12 +202,52 @@ object SocketManage {
         }
     }
 
-    fun setChatModel(json: String): ChatModel {
+    fun getRoom(rid : Int) : RoomModel {
+        roomManager.forEach {
+            if (it.rid == rid) {
+                return it
+            }
+        }
+        return RoomModel()
+    }
+
+    private fun enterRoom(roomModel: RoomModel) {
+        if (roomModel.messages.isEmpty()) {
+            // 自己进入房间
+            if (DatabaseHelper.getRoom(roomModel.rid) == null) {
+                DatabaseHelper.insertRoom(roomModel)
+            }
+            roomManager.addRoom(roomModel)
+            roomMessage.postValue(true)
+        } else {
+            // 其他人进入房间
+            roomManager.forEach {
+                if (it.rid == roomModel.rid) {
+                    // 房间人数+1
+                    it.count++
+                }
+            }
+            roomMessage.postValue(false)
+            chatManager.addChat(roomModel.messages[0])
+        }
+    }
+
+    private fun quitRoom(chatModel: ChatModel) {
+        roomManager.forEach {
+            if (it.rid == chatModel.rid) {
+                it.count--
+            }
+        }
+        roomMessage.postValue(false)
+        chatManager.addChat(chatModel)
+    }
+
+    private fun setChatModel(json: String): ChatModel {
         val type: Type = object : TypeToken<ChatModel>() {}.type
         return GsonUtil.fromJson(json, type)
     }
 
-    fun setRoomModel(json: String): RoomModel {
+    private fun setRoomModel(json: String): RoomModel {
         val type: Type = object : TypeToken<RoomModel>() {}.type
         return GsonUtil.fromJson(json, type)
     }
@@ -264,5 +262,14 @@ object SocketManage {
             socket = null
             callback(true)
         }
+    }
+
+    /**
+     * 清空房间和聊天记录
+     */
+    fun clear() {
+        roomManager.clear()
+        chatManager.clear()
+        roomManager.add(RoomModel(rid = 0, name = "广场"))
     }
 }

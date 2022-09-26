@@ -1,6 +1,7 @@
 package com.aliyunm.weeeechat.exception
 
 import android.os.Looper
+import android.util.Log
 import com.google.gson.stream.MalformedJsonException
 import java.net.UnknownHostException
 
@@ -49,6 +50,7 @@ object GlobalExceptionManager : Thread.UncaughtExceptionHandler {
             }
             else -> ex.localizedMessage ?: return false
         }
+        Log.i("msg", msg)
         return true
     }
 }

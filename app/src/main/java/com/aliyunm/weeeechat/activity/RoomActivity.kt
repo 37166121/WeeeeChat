@@ -1,4 +1,4 @@
-package com.aliyunm.weeeechat
+package com.aliyunm.weeeechat.activity
 
 import android.content.Intent
 import android.view.KeyEvent
@@ -12,6 +12,7 @@ import androidx.core.view.marginBottom
 import androidx.core.view.marginTop
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.aliyunm.weeeechat.R
 import com.aliyunm.weeeechat.adapter.RoomListAdapter
 import com.aliyunm.weeeechat.base.BaseActivity
 import com.aliyunm.weeeechat.data.model.ChatModel
@@ -144,7 +145,7 @@ class RoomActivity : BaseActivity<ActivityRoomBinding, RoomViewModel>() {
 
     override fun onStop() {
         super.onStop()
-        if (this::popup.isInitialized) {
+        if (this::popup.isInitialized && popup.isShowing) {
             popup.dismiss()
         }
     }

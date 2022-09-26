@@ -1,8 +1,17 @@
 package com.aliyunm.weeeechat.network
 
+import com.aliyunm.weeeechat.BuildConfig
 import com.aliyunm.weeeechat.network.ApiImpl.API
 
 object Service {
+
+    fun getIP(): String {
+        return if (BuildConfig.DEBUG) {
+            Api.DEBUG_IP
+        } else {
+            Api.RELEASE_IP
+        }
+    }
 
     suspend fun getPublicKey(callback : (String) -> Unit) {
         val reader = API.getPublicKey().charStream()

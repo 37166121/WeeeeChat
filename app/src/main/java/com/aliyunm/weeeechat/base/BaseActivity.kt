@@ -1,5 +1,6 @@
 package com.aliyunm.weeeechat.base
 
+import android.content.pm.ActivityInfo
 import android.os.Bundle
 import android.view.MotionEvent
 import android.view.View
@@ -22,7 +23,10 @@ abstract class BaseActivity<VB : ViewBinding, VM : ViewModel> : AppCompatActivit
         viewModel = getViewModel_()
         initData()
         initView()
-        fullScreen(window)
+        if (isFull()) {
+            fullScreen(window)
+        }
+        requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
     }
 
     abstract fun initData()
@@ -38,11 +42,15 @@ abstract class BaseActivity<VB : ViewBinding, VM : ViewModel> : AppCompatActivit
             val v = currentFocus
             if (v != null) {
                 if (isShouldHideKeyboard(v, ev)) {
-                    KeyboardUtils.hideSoftInput(this);
+                    KeyboardUtils.hideSoftInput(this)
                 }
             }
         }
         return super.dispatchTouchEvent(ev)
+    }
+
+    open fun isFull() : Boolean {
+        return true
     }
 
     // Return whether touch the view.

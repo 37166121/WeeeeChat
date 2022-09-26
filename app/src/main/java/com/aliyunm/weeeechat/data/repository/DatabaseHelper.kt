@@ -57,6 +57,9 @@ object DatabaseHelper {
         db.roomDao().delete(room)
     }
 
+    /**
+     * 清空房间和聊天记录
+     */
     fun deleteAll() {
         deleteAllChat()
         deleteAllRoom()

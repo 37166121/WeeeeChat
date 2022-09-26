@@ -8,7 +8,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import com.aliyunm.weeeechat.ChatActivity
+import com.aliyunm.weeeechat.activity.ChatActivity
 import com.aliyunm.weeeechat.R
 import com.aliyunm.weeeechat.data.model.ChatModel
 import com.aliyunm.weeeechat.data.model.MessageModel
@@ -35,12 +35,14 @@ class RoomListAdapter(val data : ArrayList<RoomModel>) : RecyclerView.Adapter<Ro
 
     override fun onBindViewHolder(holder: MessageViewHolder, position: Int) {
         val room = data[position]
-        holder.avatar.text = room.name
-        holder.name.text = room.name
-        if (room.messages.size != 0) {
-            val chat = room.messages.last()
-            holder.message.text = "${chat.nickname}:${chat.content}"
-            holder.time.text = timeFormat(chat.time)
+        holder.apply {
+            avatar.text = room.name
+            name.text = room.name
+            if (room.messages.size != 0) {
+                val chat = room.messages.last()
+                message.text = "${chat.nickname}:${chat.content}"
+                time.text = timeFormat(chat.time)
+            }
         }
         if (position != 0) {
             holder.itemView.setOnLongClickListener {
@@ -60,8 +62,6 @@ class RoomListAdapter(val data : ArrayList<RoomModel>) : RecyclerView.Adapter<Ro
                 uid = chat.uid
             }
             val intent = Intent(mContext, ChatActivity::class.java)
-            SocketManage.roomChats.clear()
-            SocketManage.roomChats.addAll(room.messages)
             intent.putExtra("rid", rid)
             intent.putExtra("uid", uid)
             mContext.startActivity(intent)
