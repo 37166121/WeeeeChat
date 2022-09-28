@@ -11,7 +11,7 @@ import com.aliyunm.weeeechat.data.model.MessageModel.Companion.QUIT_ROOM
 import com.aliyunm.weeeechat.data.model.RoomModel
 import com.aliyunm.weeeechat.data.repository.DatabaseHelper
 import com.aliyunm.weeeechat.network.Api
-import com.aliyunm.weeeechat.network.Service.getIP
+import com.aliyunm.weeeechat.network.ApiImpl.getIP
 import com.aliyunm.weeeechat.util.GsonUtil
 import com.aliyunm.weeeechat.util.MessageUtil
 import com.google.gson.Gson
@@ -152,6 +152,7 @@ object SocketManage {
      */
     private fun onMessage(message: String) {
         Log.i(this::class.java.name, "收到消息")
+        Log.i("message", message)
         val s: List<String> = message.split("--------------------------")
         val messageModel = GsonUtil.fromJson(MessageUtil.decode(s[0], s[1]), MessageModel::class.java)
         when (messageModel.type) {

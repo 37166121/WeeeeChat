@@ -1,6 +1,5 @@
 package com.aliyunm.weeeechat.network
 
-import com.aliyunm.weeeechat.BuildConfig
 import okhttp3.ResponseBody
 import retrofit2.http.GET
 import retrofit2.http.Path

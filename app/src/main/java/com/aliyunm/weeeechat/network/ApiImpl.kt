@@ -2,8 +2,6 @@ package com.aliyunm.weeeechat.network
 
 import android.util.Log
 import com.aliyunm.weeeechat.BuildConfig
-import com.aliyunm.weeeechat.network.Api.Companion.DEBUG_BASEURL
-import com.aliyunm.weeeechat.network.Api.Companion.RELEASE_BASEURL
 import okhttp3.*
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
@@ -16,13 +14,31 @@ import java.util.concurrent.TimeUnit
  */
 object ApiImpl {
 
+    fun getIP(): String {
+        return if (BuildConfig.DEBUG) {
+            Api.DEBUG_IP
+        } else {
+            Api.RELEASE_IP
+        }
+//        return Api.RELEASE_IP
+    }
+
+    fun getBASEURL(): String {
+        return if (BuildConfig.DEBUG) {
+            Api.DEBUG_BASEURL
+        } else {
+            Api.RELEASE_BASEURL
+        }
+//        return Api.RELEASE_BASEURL
+    }
+
     /**
      * 配置Retrofit
      */
     val API : Api by lazy {
         val client = getOkHttpClient()
         Retrofit.Builder()
-            .baseUrl(if (BuildConfig.DEBUG) { DEBUG_BASEURL } else { RELEASE_BASEURL })
+            .baseUrl(getBASEURL())
             .addConverterFactory(GsonConverterFactory.create())
             .client(client)
             .build()

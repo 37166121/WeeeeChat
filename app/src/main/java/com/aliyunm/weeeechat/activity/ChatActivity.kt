@@ -36,7 +36,9 @@ class ChatActivity : BaseActivity<ActivityChatBinding, ChatViewModel>() {
                 room = SocketManage.getRoom(rid)
             }
 
-            chats.addAll(room.messages)
+            if (chats.isEmpty()) {
+                chats.addAll(room.messages)
+            }
 
             onMessage(this@ChatActivity) {
                 if (it.rid == rid) {
